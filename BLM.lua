@@ -85,11 +85,12 @@ end
 -- User setup functions for this job.  Recommend that these be overridden in a sidecar file.
 -------------------------------------------------------------------------------------------------------------------
  
--- Setup vars that are user-dependent.  Can override this function in a sidecar file.
+-- Setup vars that are user-dependent.  Setup which sets you want to contain which sets of gear. 
+-- By default my sets are: Normal is bursting gear, CMP is Conserve MP/MP return body, FreeNuke self explanatory.
 
 function job_setup()
     state.OffenseMode:options('None', 'Locked')
-    state.CastingMode:options('Normal', 'Mid', 'Resistant', 'CMP')
+    state.CastingMode:options('Normal', 'CMP', 'FreeNuke')
     state.IdleMode:options('Normal', 'PDT')
     state.Moving  = M(false, "moving")
    
@@ -122,11 +123,7 @@ function job_setup()
         ['Aspirs'] = {'Aspir','Aspir II','Aspir III'},
         ['Sleepgas'] = {'Sleepga','Sleepga II'}
     }
-    -- Additional local binds
-    send_command('bind ^` gs c toggle MagicBurst')
-    send_command('bind !` gs c toggle ConsMP')
 
- 
  
     organizer_items = {aeonic="Khatvanga"}
     select_default_macro_book()
@@ -183,22 +180,14 @@ function init_gear_sets()
     legs={ name="Merlinic Shalwar", augments={'Mag. Acc.+16 "Mag.Atk.Bns."+16','Magic burst mdg.+10%','Mag. Acc.+10','"Mag.Atk.Bns."+14',}},
     feet="Merlinic Crackows",
     neck="Mizukage-no-Kubikazari",
-    waist="Hachirin-no-Obi",
+    waist="Eschan Stone",
     left_ear="Barkaro. Earring",
     right_ear="Static Earring",
     left_ring="Archon Ring",
     right_ring="Mujin Band",
     back={ name="Taranus's Cape", augments={'MP+60','Mag. Acc+20 /Mag. Dmg.+20','MP+20','"Fast Cast"+10',}},}
-
-    -- Set to be imposed on top of above base Death set when Death Mode and Magic Burst Mode are both on
  
-    -- Weaponskill sets
-
-    -- Default set for any weaponskill that isn't any more specifically defined
-
-    sets.precast.WS = {}
-
-    -- Specific weaponskill sets.  Uses the base set if an appropriate WSMod version isn't found.
+    -- Sets for WS, Feel free to add one for Vidohunir if you have Laevateinn
 
     sets.precast.WS['Myrkr'] = {main={ name="Lathi", augments={'MP+80','INT+20','"Mag.Atk.Bns."+20',}},
     sub="Niobid Strap",
@@ -223,6 +212,9 @@ function init_gear_sets()
 
     sets.midcast['Enhancing Magic'] = {}
  
+	-- I personally do not have gear to alter these abilities as of the time of disseminating this file, but 
+	-- definitely add them here if you have them.
+ 
     sets.midcast.Refresh = {}
     sets.midcast.Haste = {}
     sets.midcast.Phalanx = {}
@@ -245,8 +237,7 @@ function init_gear_sets()
     right_ring="Stikini Ring",
     back={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10',}},}   
 
-    sets.midcast['Enfeebling Magic'].Mid = set_combine(sets.midcast['Enfeebling Magic'],{})
-    sets.midcast['Enfeebling Magic'].Resistant = set_combine(sets.midcast['Enfeebling Magic'].Mid, { }) 
+    sets.midcast['Enfeebling Magic'].FreeNuke = set_combine(sets.midcast['Enfeebling Magic'],{})
     sets.midcast.ElementalEnfeeble = sets.midcast['Enfeebling Magic']
  
     sets.midcast['Dark Magic'] = {main={ name="Lathi", augments={'MP+80','INT+20','"Mag.Atk.Bns."+20',}},
@@ -277,15 +268,28 @@ function init_gear_sets()
     legs={ name="Merlinic Shalwar", augments={'Mag. Acc.+25 "Mag.Atk.Bns."+25','Mag. crit. hit dmg. +4%','MND+4','Mag. Acc.+11','"Mag.Atk.Bns."+14',}},
     feet="Merlinic Crackows",
     neck="Mizu. Kubikazari",
-    waist="Hachirin-no-Obi",
+    waist="Eschan Stone",
     left_ear="Static Earring",
     right_ear="Barkaro. Earring",
     left_ring="Mujin Band",
     right_ring="Locus Ring",
     back={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10',}},}
 
-    sets.midcast['Elemental Magic'].Mid = set_combine(sets.midcast['Elemental Magic'], {})
-    sets.midcast['Elemental Magic'].Resistant = set_combine(sets.midcast['Elemental Magic'].Mid, {})
+    sets.midcast['Elemental Magic'].FreeNuke = set_combine(sets.midcast['Elemental Magic'], {main="Grioavolr",
+    sub="Niobid Strap",
+    ammo="Pemphredo Tathlum",
+    head={ name="Merlinic Hood", augments={'Mag. Acc.+24 "Mag.Atk.Bns."+24','Magic burst mdg.+8%','Mag. Acc.+2','"Mag.Atk.Bns."+13',}},
+    body="Merlinic Jubbah",
+    hands={ name="Amalric Gages", augments={'MP+60','Mag. Acc.+15','"Mag.Atk.Bns."+15',}},
+    legs={ name="Merlinic Shalwar", augments={'Mag. Acc.+25 "Mag.Atk.Bns."+25','Mag. crit. hit dmg. +4%','MND+4','Mag. Acc.+11','"Mag.Atk.Bns."+14',}},
+    feet="Merlinic Crackows",
+    neck="Sanctity Necklace",
+    waist="Eschan Stone",
+    left_ear="Friomisi Earring",
+    right_ear="Barkaro. Earring",
+    left_ring="Shiva Ring +1",
+    right_ring="Shiva Ring +1",
+    back={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10',}}})
     sets.midcast['Elemental Magic'].CMP = set_combine(sets.midcast['Elemental Magic'], {main={ name="Lathi", augments={'MP+80','INT+20','"Mag.Atk.Bns."+20',}},
     sub="Niobid Strap",
     ammo="Seraphic Ampulla",
@@ -302,8 +306,21 @@ function init_gear_sets()
     right_ring="Shiva Ring +1",
     back={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10',}}})
     sets.midcast['Elemental Magic'].HighTierNuke = set_combine(sets.midcast['Elemental Magic'], {})
-    sets.midcast['Elemental Magic'].HighTierNuke.Mid = set_combine(sets.midcast['Elemental Magic'].HighTierNuke, {})
-    sets.midcast['Elemental Magic'].HighTierNuke.Resistant = set_combine(sets.midcast['Elemental Magic'].HighTierNuke.Mid, {})
+    sets.midcast['Elemental Magic'].HighTierNuke.FreeNuke = set_combine(sets.midcast['Elemental Magic'].HighTierNuke, {main="Grioavolr",
+    sub="Niobid Strap",
+    ammo="Pemphredo Tathlum",
+    head={ name="Merlinic Hood", augments={'Mag. Acc.+24 "Mag.Atk.Bns."+24','Magic burst mdg.+8%','Mag. Acc.+2','"Mag.Atk.Bns."+13',}},
+    body="Merlinic Jubbah",
+    hands={ name="Amalric Gages", augments={'MP+60','Mag. Acc.+15','"Mag.Atk.Bns."+15',}},
+    legs={ name="Merlinic Shalwar", augments={'Mag. Acc.+25 "Mag.Atk.Bns."+25','Mag. crit. hit dmg. +4%','MND+4','Mag. Acc.+11','"Mag.Atk.Bns."+14',}},
+    feet="Merlinic Crackows",
+    neck="Sanctity Necklace",
+    waist="Eschan Stone",
+    left_ear="Friomisi Earring",
+    right_ear="Barkaro. Earring",
+    left_ring="Shiva Ring +1",
+    right_ring="Shiva Ring +1",
+    back={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10',}}})
     sets.midcast['Elemental Magic'].HighTierNuke.CMP = set_combine(sets.midcast['Elemental Magic'].HighTierNuke, {main={ name="Lathi", augments={'MP+80','INT+20','"Mag.Atk.Bns."+20',}},
     sub="Niobid Strap",
     ammo="Seraphic Ampulla",
@@ -340,17 +357,34 @@ function init_gear_sets()
     legs={ name="Merlinic Shalwar", augments={'Mag. Acc.+16 "Mag.Atk.Bns."+16','Magic burst mdg.+10%','Mag. Acc.+10','"Mag.Atk.Bns."+14',}},
     feet="Merlinic Crackows",
     neck="Mizu. Kubikazari",
-    waist="Hachirin-no-Obi",
+    waist="Eschan Stone",
     left_ear="Static Earring",
     right_ear="Barkaro. Earring",
     left_ring="Archon Ring",
     right_ring="Mujin Band",
     back={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10',}}})
  
+	sets.midcast['Comet'].FreeNuke = set_combine(sets.midcast['Elemental Magic'], {{ name="Lathi", augments={'MP+80','INT+20','"Mag.Atk.Bns."+20',}},
+    sub="Niobid Strap",
+    ammo="Seraphic Ampulla",
+    head="Pixie Hairpin +1",
+    body="Merlinic Jubbah",
+    hands={ name="Amalric Gages", augments={'MP+60','Mag. Acc.+15','"Mag.Atk.Bns."+15',}},
+    legs={ name="Merlinic Shalwar", augments={'Mag. Acc.+16 "Mag.Atk.Bns."+16','Magic burst mdg.+10%','Mag. Acc.+10','"Mag.Atk.Bns."+14',}},
+    feet="Merlinic Crackows",
+    neck="Sanctity Necklace",
+    waist="Eschan Stone",
+    left_ear="Friomisi Earring",
+    right_ear="Barkaro. Earring",
+    left_ring="Shiva Ring +1",
+    right_ring="Shiva Ring +1",
+    back={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10',}}})
  
     --Set to be equipped when Day/Weather match current spell element
 
     sets.Obi = {waist='Hachirin-no-Obi'}
+	
+	-- I actually have two references to equip this item, just in case your globals are out of date.
  
     -- Resting sets
 	
@@ -405,6 +439,7 @@ function init_gear_sets()
     sets.TreasureHunter = {waist="Chaac Belt"}
  
     -- Set for Conserve MP toggle, convert damage to MP body.
+	
     sets.ConsMP = {body="Seidr Cotehardie"}
  
     --- PDT set is designed to be used for MP total set, MDT can be used for whatever you like but in MDT mode
@@ -482,7 +517,7 @@ function init_gear_sets()
  
     -- Engaged sets
  
-    -- Set is designed to preserve MP total from Myrkr for Death sets
+    -- Set is designed for engaging a monster before pop to ensure you are at maximum MP value when Geas Fete triggers an MP refill.
 	
 	sets.engaged = {main={ name="Lathi", augments={'MP+80','INT+20','"Mag.Atk.Bns."+20',}},
     sub="Niobid Strap",
@@ -544,6 +579,9 @@ function job_midcast(spell, action, spellMap, eventArgs)
 -- just like I have it listed or else this argument will not work.
 
     if spell.action_type == 'Magic' then
+			if spell.element == world.weather_element or spell.element == world.day_element then
+            equip(set_combine(sets.midcast['Elemental Magic'], {waist="Hachirin-no-Obi",}))
+        end
             if spell.english == 'Death' then
                 equip(sets.midcast['Death'])
 			end
