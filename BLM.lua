@@ -86,11 +86,12 @@ end
 -------------------------------------------------------------------------------------------------------------------
  
 -- Setup vars that are user-dependent.  Setup which sets you want to contain which sets of gear. 
--- By default my sets are: Normal is bursting gear, CMP is Conserve MP/MP return body, FreeNuke self explanatory.
+-- By default my sets are: Normal is bursting gear, Occult_Acumen is Conserve MP/MP return body, FreeNuke_Effect self explanatory.
+-- If you're new to all this gearswap jazz, the F9~12 keys and CTRL keys in combination is how you activate this stuff.
 
 function job_setup()
     state.OffenseMode:options('None', 'Locked')
-    state.CastingMode:options('Normal', 'CMP', 'FreeNuke')
+    state.CastingMode:options('Normal', 'Occult_Acumen', 'FreeNuke_Effect')
     state.IdleMode:options('Normal', 'PDT')
     state.Moving  = M(false, "moving")
    
@@ -168,8 +169,7 @@ function init_gear_sets()
     sets.precast.FC['Elemental Magic'] = set_combine(sets.precast.FC, {ear1="Barkarole earring"})
     sets.precast.FC['Healing Magic'] = set_combine(sets.precast.FC, {body="Heka's Kalasiris",legs="Doyen pants", back="Pahtli Cape"})
  
-    -- Midcast set for Death, Might as well only have one set, as death Magic Bursts arent really handled
-	-- differently with burst damage +% so long as your set is good enough
+    -- Midcast set for Death, Might as well only have one set, unless you plan on free-nuking death for some unexplainable reason.
 
     sets.midcast['Death'] = {main={ name="Lathi", augments={'MP+80','INT+20','"Mag.Atk.Bns."+20',}},
     sub="Niobid Strap",
@@ -237,8 +237,39 @@ function init_gear_sets()
     right_ring="Stikini Ring",
     back={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10',}},}   
 
-    sets.midcast['Enfeebling Magic'].FreeNuke = set_combine(sets.midcast['Enfeebling Magic'],{})
-    sets.midcast.ElementalEnfeeble = sets.midcast['Enfeebling Magic']
+    sets.midcast['Enfeebling Magic'].FreeNuke_Effect = set_combine(sets.midcast['Enfeebling Magic'],{main="Grioavolr",
+    sub="Niobid Strap",
+    ammo="Pemphredo Tathlum",
+    head={ name="Merlinic Hood", augments={'Mag. Acc.+24 "Mag.Atk.Bns."+24','Magic burst mdg.+8%','Mag. Acc.+2','"Mag.Atk.Bns."+13',}},
+    body="Vanya Robe",
+    hands="Lurid Mitts",
+    legs={ name="Psycloth Lappas", augments={'MP+80','Mag. Acc.+15','"Fast Cast"+7',}},
+    feet={ name="Medium's Sabots", augments={'MP+50','MND+8','"Conserve MP"+6','"Cure" potency +3%',}},
+    neck="Henic Torque",
+    waist="Eschan Stone",
+    left_ear="Barkaro. Earring",
+    right_ear="Digni. Earring",
+    left_ring="Stikini Ring",
+    right_ring="Stikini Ring",
+    back={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10',}}})
+
+	sets.midcast['Enfeebling Magic'].Occult_Acumen = set_combine(sets.midcast['Enfeebling Magic'],{main="Grioavolr",
+    sub="Niobid Strap",
+    ammo="Pemphredo Tathlum",
+    head={ name="Merlinic Hood", augments={'Mag. Acc.+24 "Mag.Atk.Bns."+24','Magic burst mdg.+8%','Mag. Acc.+2','"Mag.Atk.Bns."+13',}},
+    body="Vanya Robe",
+    hands="Lurid Mitts",
+    legs={ name="Psycloth Lappas", augments={'MP+80','Mag. Acc.+15','"Fast Cast"+7',}},
+    feet={ name="Medium's Sabots", augments={'MP+50','MND+8','"Conserve MP"+6','"Cure" potency +3%',}},
+    neck="Henic Torque",
+    waist="Eschan Stone",
+    left_ear="Barkaro. Earring",
+    right_ear="Digni. Earring",
+    left_ring="Stikini Ring",
+    right_ring="Stikini Ring",
+    back={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10',}}})
+	
+	sets.midcast.ElementalEnfeeble = sets.midcast['Enfeebling Magic']
  
     sets.midcast['Dark Magic'] = {main={ name="Lathi", augments={'MP+80','INT+20','"Mag.Atk.Bns."+20',}},
     sub="Niobid Strap",
@@ -275,7 +306,7 @@ function init_gear_sets()
     right_ring="Locus Ring",
     back={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10',}},}
 
-    sets.midcast['Elemental Magic'].FreeNuke = set_combine(sets.midcast['Elemental Magic'], {main="Grioavolr",
+    sets.midcast['Elemental Magic'].FreeNuke_Effect = set_combine(sets.midcast['Elemental Magic'], {main="Grioavolr",
     sub="Niobid Strap",
     ammo="Pemphredo Tathlum",
     head={ name="Merlinic Hood", augments={'Mag. Acc.+24 "Mag.Atk.Bns."+24','Magic burst mdg.+8%','Mag. Acc.+2','"Mag.Atk.Bns."+13',}},
@@ -290,7 +321,7 @@ function init_gear_sets()
     left_ring="Shiva Ring +1",
     right_ring="Shiva Ring +1",
     back={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10',}}})
-    sets.midcast['Elemental Magic'].CMP = set_combine(sets.midcast['Elemental Magic'], {main={ name="Lathi", augments={'MP+80','INT+20','"Mag.Atk.Bns."+20',}},
+    sets.midcast['Elemental Magic'].Occult_Acumen = set_combine(sets.midcast['Elemental Magic'], {main={ name="Lathi", augments={'MP+80','INT+20','"Mag.Atk.Bns."+20',}},
     sub="Niobid Strap",
     ammo="Seraphic Ampulla",
     head={ name="Merlinic Hood", augments={'Mag. Acc.+24','"Occult Acumen"+10','INT+9',}},
@@ -306,7 +337,7 @@ function init_gear_sets()
     right_ring="Shiva Ring +1",
     back={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10',}}})
     sets.midcast['Elemental Magic'].HighTierNuke = set_combine(sets.midcast['Elemental Magic'], {})
-    sets.midcast['Elemental Magic'].HighTierNuke.FreeNuke = set_combine(sets.midcast['Elemental Magic'].HighTierNuke, {main="Grioavolr",
+    sets.midcast['Elemental Magic'].HighTierNuke.FreeNuke_Effect = set_combine(sets.midcast['Elemental Magic'].HighTierNuke, {main="Grioavolr",
     sub="Niobid Strap",
     ammo="Pemphredo Tathlum",
     head={ name="Merlinic Hood", augments={'Mag. Acc.+24 "Mag.Atk.Bns."+24','Magic burst mdg.+8%','Mag. Acc.+2','"Mag.Atk.Bns."+13',}},
@@ -321,7 +352,7 @@ function init_gear_sets()
     left_ring="Shiva Ring +1",
     right_ring="Shiva Ring +1",
     back={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10',}}})
-    sets.midcast['Elemental Magic'].HighTierNuke.CMP = set_combine(sets.midcast['Elemental Magic'].HighTierNuke, {main={ name="Lathi", augments={'MP+80','INT+20','"Mag.Atk.Bns."+20',}},
+    sets.midcast['Elemental Magic'].HighTierNuke.Occult_Acumen = set_combine(sets.midcast['Elemental Magic'].HighTierNuke, {main={ name="Lathi", augments={'MP+80','INT+20','"Mag.Atk.Bns."+20',}},
     sub="Niobid Strap",
     ammo="Seraphic Ampulla",
     head={ name="Merlinic Hood", augments={'Mag. Acc.+24','"Occult Acumen"+10','INT+9',}},
@@ -364,7 +395,7 @@ function init_gear_sets()
     right_ring="Mujin Band",
     back={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10',}}})
  
-	sets.midcast['Comet'].FreeNuke = set_combine(sets.midcast['Elemental Magic'], {{ name="Lathi", augments={'MP+80','INT+20','"Mag.Atk.Bns."+20',}},
+	sets.midcast['Comet'].FreeNuke_Effect = set_combine(sets.midcast['Elemental Magic'], {{ name="Lathi", augments={'MP+80','INT+20','"Mag.Atk.Bns."+20',}},
     sub="Niobid Strap",
     ammo="Seraphic Ampulla",
     head="Pixie Hairpin +1",
@@ -623,7 +654,7 @@ function job_midcast(spell, action, spellMap, eventArgs)
 	end
  end
 
- function job_post_midcast(spell, action, spellMap, eventArgs)
+function job_post_midcast(spell, action, spellMap, eventArgs)
     if spell.element == world.day_element or spell.element == world.weather_element then
         if string.find(spell.english,'helix') then
             equip(sets.midcast.Helix)
@@ -631,10 +662,20 @@ function job_midcast(spell, action, spellMap, eventArgs)
             equip(sets.Obi)
         end
     end
-    if spell.skill == 'Elemental Magic' and state.ConsMP.value then
-        equip(sets.ConsMP)
-    end
+	if spell.skill == 'Elemental Magic' and player.mp < 520 then
+		equip(sets.ConsMP)
+		end
+	if spell.skill == 'Enfeebling Magic' and state.HybridMode ~= 'Resist' then
+	equip(sets.midcast['Enfeebling Magic'].Effect)
+	end
 end
+ 
+ --	if buffactive['Elemental Seal'] and spell.skill == 'Elemental Magic' and state.HybridMode ~= 'Resist' then
+ --	equip(sets.midcast['Enfeebling Magic'].Effect)
+ --	end
+ 
+ --	if spell.skill == 'Enfeebling Magic' and state.HybridMode ~= 'Resist' then
+ --	equip(sets.midcast['Enfeebling Magic'])
  
 function job_aftercast(spell, action, spellMap, eventArgs)
     -- Lock feet after using Mana Wall.
@@ -755,9 +796,7 @@ if player and player.index and windower.ffxi.get_mob_by_index(player.index) then
     mov.y = windower.ffxi.get_mob_by_index(player.index).y
     mov.z = windower.ffxi.get_mob_by_index(player.index).z
 end
-if buffactive['Mana Wall'] then
-                state.Moving = false
-                end
+
 
 moving = false
 windower.raw_register_event('prerender',function()
