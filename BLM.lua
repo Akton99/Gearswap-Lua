@@ -689,7 +689,7 @@ function job_aftercast(spell, action, spellMap, eventArgs)
             send_command('wait 60;input /echo Sleep Effect: [WEARING OFF IN 30 SEC.];wait 15;input /echo Sleep Effect: [WEARING OFF IN 15 SEC.];wait 10;input /echo Sleep Effect: [WEARING OFF IN 5 SEC.]')
         elseif spell.english == "Sleep" or spell.english == "Sleepga" then -- Sleep & Sleepga Countdown --
             send_command('wait 30;input /echo Sleep Effect: [WEARING OFF IN 30 SEC.];wait 15;input /echo Sleep Effect: [WEARING OFF IN 15 SEC.];wait 10;input /echo Sleep Effect: [WEARING OFF IN 5 SEC.]')
-        elseif spell.english == "Break" then -- Break Countdown --
+        elseif spell.english == "Break" or spell.english == "Breakga" then -- Break Countdown --
             send_command('wait 25;input /echo Break Effect: [WEARING OFF IN 5 SEC.]')
         elseif spell.english == "Paralyze" then -- Paralyze Countdown --
              send_command('wait 115;input /echo Paralyze Effect: [WEARING OFF IN 5 SEC.]')
