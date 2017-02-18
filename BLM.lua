@@ -1,66 +1,23 @@
 
+
+
+
+---------------------------------------------------------------------------------
 -- This lua is based off of the Kinematics template and uses Motenten globals. --
-	--Authors of this file--
-		--Byrne (Asura)--
-		--Gamergiving (Asura)--
-		--Verbannt (Asura)--
-		--Lygre(Odin)[Made what this is based off of]--
-		
---Important note: In order for this lua to work optimally, you should have another copy lua
-	--that runs in conjuction with this one named "BLM2.lua". In that lua you will define the correct
-	--Max MP tables for player.mp functions while in Reisenjima and Escha areas. The MP value tables
-	--in each lua must be fixed to match your Max MP value in the set you are in, in the proper situation
-	--BLM (this one) should reflect your values outside Escha/Reisenjima and BLM2 should reflect those
-	--values when you are inside with vorseals. The MP values to be considered are: Idle(for death),
-	--Max MP while in refresh gear, Max MP while in fastest fast cast set, and Max MP when in diminished
-	--fast cast set. 
+--                                                                             --
+-----------------------------Authors of this file--------------------------------
+------           ******************************************                ------
+---                                                                           ---
+--	  Byrne (Asura) --------------- [handling of sets and autoMP arguments]    --
+--	  Gamergiving (Asura) ----------- [movement speed conversion mechanics]    --
+--        Verbannt (Asura) -------------------  [organization of job functions]    --
+--	  Lygre(Odin) ------------------------ [Made what this is based off of]    --
+--                                                                             --
+---------------------------------------------------------------------------------
+	
+	
+-- This file should be treated as a work in progress, check back to The Black Sacrament Guide or Github for updates
 
---In addition to this, you will need a copy of this file renamed to BLM2.lua and you
-	--will need to replace the following argument on the SECOND BLM lua. 
-	--(around line 690~720 depending on your edits)
-
-	--function job_buff_change(buff, gain)
-	--if buff == "Vorseal" then
-	--send_command('gs l blm2.lua')
-	--end
-	--if buff == "Visitant" then
-	--send_command('gs l blm3.lua')
-	--end
-    --if buff == "Mana Wall" and not gain then
-    --    enable('feet','back')
-    --    handle_equipping_gear(player.status)
-    --end
-    --if buff == "Commitment" and not gain then
-    --    equip({ring2="Capacity Ring"})
-    --    if player.equipment.right_ring == "Capacity Ring" then
-    --        disable("ring2")
-    --   else
-    --        enable("ring2")
-    --    end
-    --end
-	--end
-	
-	
-	
---Highlight that section (line 691) and replace it with this: (Dont forget to remove the -- on each line)
-	
-	--function job_buff_change(buff, gain)
-	--if buff == "Vorseal" and not gain then
-	--send_command('gs l blm.lua')
-	--end
-    --if buff == "Mana Wall" and not gain then
-    --    enable('feet','back')
-    --    handle_equipping_gear(player.status)
-    --end
-    --if buff == "Commitment" and not gain then
-    --    equip({ring2="Capacity Ring"})
-    --    if player.equipment.right_ring == "Capacity Ring" then
-    --        disable("ring2")
-    --    else
-    --        enable("ring2")
-    --    end
-	--    end
-	--end
 
 	
 	
@@ -87,12 +44,14 @@ end
  
 -- Setup vars that are user-dependent.  Setup which sets you want to contain which sets of gear. 
 -- By default my sets are: Normal is bursting gear, Occult_Acumen is Conserve MP/MP return body, FreeNuke_Effect self explanatory.
--- If you're new to all this gearswap jazz, the F9~12 keys and CTRL keys in combination is how you activate this stuff.
+-- If you're new to gearswap, the F9~12 keys and CTRL keys in combination is how you activate this stuff.
 
 function job_setup()
     state.OffenseMode:options('None', 'Locked')
     state.CastingMode:options('Normal', 'Occult_Acumen', 'FreeNuke_Effect')
     state.IdleMode:options('Normal', 'PDT')
+	state.VorsealMode = M('Normal', 'Vorseal')
+	--Vorseal mode is handled simply when zoning into an escha zone--
     state.Moving  = M(false, "moving")
    
     MagicBurstIndex = 0
@@ -124,8 +83,8 @@ function job_setup()
         ['Aspirs'] = {'Aspir','Aspir II','Aspir III'},
         ['Sleepgas'] = {'Sleepga','Sleepga II'}
     }
-
- 
+	send_command('bind f10 gs c cycle IdleMode')
+	send_command('bind f11 gs c cycle CastingMode')
     organizer_items = {aeonic="Khatvanga"}
     select_default_macro_book()
 end
@@ -134,6 +93,7 @@ end
 function user_unload()
     send_command('unbind ^`')
     send_command('unbind @`')
+	send_command('unbind f10')
 end
  
  
@@ -159,10 +119,37 @@ function init_gear_sets()
     -- Base precast Fast Cast set, this set will have to show up many times in the function section of the lua
 	-- So dont forget to do that.
  
-    sets.precast.FC = {main="Marin Staff",ammo="Incantor Stone",
-        head="Nahtirah hat",neck="Orunmila's Torque",ear2="Loquacious Earring",
-        body="Anhur Robe",hands="Helios gloves",ring1="Prolix Ring",ring2="Weatherspoon Ring",
-        back={ name="Taranus's Cape", augments={'MP+60','Mag. Acc+20 /Mag. Dmg.+20','MP+20','"Fast Cast"+10',}},waist="Witful Belt",legs="Psycloth Lappas",feet="Regal pumps +1"}
+    sets.precast.FC = {
+		main="Marin Staff",
+		ammo="Incantor Stone",
+        head="Nahtirah hat",
+		neck="Orunmila's Torque",
+		ear2="Loquacious Earring",
+        body="Anhur Robe",
+		hands="Helios gloves",
+		ring1="Prolix Ring",
+		ring2="Weatherspoon Ring",
+        back={ name="Taranus's Cape", augments={'MP+60','Mag. Acc+20 /Mag. Dmg.+20','MP+20','"Fast Cast"+10',}},
+		waist="Witful Belt",
+		legs="Psycloth Lappas",
+		feet="Regal pumps +1"}
+		
+	
+	sets.precast.FC.HighMP = {
+		main="Lathi",ammo="Pemphredo Tathlum",
+        head="Nahtirah hat",
+		neck="Orunmila's Torque",
+		ear2="Loquacious Earring",
+		ear1="Evans Earring",
+        body="Helios Jacket",
+		hands="Helios gloves",
+		ring1="Sangoma Ring",
+		ring2="Bifrost Ring",
+        back={ name="Taranus's Cape", augments={'MP+60','Mag. Acc+20 /Mag. Dmg.+20','MP+20','"Fast Cast"+10',}},
+		waist="Hachirin-no-Obi",
+		legs="Psycloth Lappas",
+		feet="Regal pumps +1"}
+		
 		
     sets.precast.FC['Enhancing Magic'] = set_combine(sets.precast.FC, {waist="Siegel Sash"})
     sets.precast.FC['Enfeebling Magic'] = sets.precast.FC
@@ -171,46 +158,63 @@ function init_gear_sets()
  
     -- Midcast set for Death, Might as well only have one set, unless you plan on free-nuking death for some unexplainable reason.
 
-    sets.midcast['Death'] = {main={ name="Lathi", augments={'MP+80','INT+20','"Mag.Atk.Bns."+20',}},
-    sub="Niobid Strap",
-    ammo="Pemphredo Tathlum",
-    head="Pixie Hairpin +1",
-    body="Amalric Doublet",
-    hands={ name="Amalric Gages", augments={'MP+60','Mag. Acc.+15','"Mag.Atk.Bns."+15',}},
-    legs={ name="Merlinic Shalwar", augments={'Mag. Acc.+16 "Mag.Atk.Bns."+16','Magic burst mdg.+10%','Mag. Acc.+10','"Mag.Atk.Bns."+14',}},
-    feet="Merlinic Crackows",
-    neck="Mizukage-no-Kubikazari",
-    waist="Eschan Stone",
-    left_ear="Barkaro. Earring",
-    right_ear="Static Earring",
-    left_ring="Archon Ring",
-    right_ring="Mujin Band",
-    back={ name="Taranus's Cape", augments={'MP+60','Mag. Acc+20 /Mag. Dmg.+20','MP+20','"Fast Cast"+10',}},}
+    sets.midcast['Death'] = {
+		main="Grioavolr",
+		sub="Niobid Strap",
+		ammo="Pemphredo Tathlum",
+		head="Pixie Hairpin +1",
+		body="Amalric Doublet",
+		hands={ name="Amalric Gages", augments={'MP+60','Mag. Acc.+15','"Mag.Atk.Bns."+15',}},
+		legs={ name="Merlinic Shalwar", augments={'Mag. Acc.+16 "Mag.Atk.Bns."+16','Magic burst mdg.+10%','Mag. Acc.+10','"Mag.Atk.Bns."+14',}},
+		feet="Merlinic Crackows",
+		neck="Mizukage-no-Kubikazari",
+		waist="Eschan Stone",
+		left_ear="Barkaro. Earring",
+		right_ear="Static Earring",
+		left_ring="Archon Ring",
+		right_ring="Mujin Band",
+		back={ name="Taranus's Cape", augments={'MP+60','Mag. Acc+20 /Mag. Dmg.+20','MP+20','"Fast Cast"+10',}},}
  
     -- Sets for WS, Feel free to add one for Vidohunir if you have Laevateinn
 
-    sets.precast.WS['Myrkr'] = {main={ name="Lathi", augments={'MP+80','INT+20','"Mag.Atk.Bns."+20',}},
-    sub="Niobid Strap",
-    ammo="Pemphredo Tathlum",
-    head="Pixie Hairpin +1",
-    body={ name="Witching Robe", augments={'MP+50','Mag. Acc.+15','"Mag.Atk.Bns."+15','"Refresh"+1',}},
-    hands="Amalric Gages",
-    legs={ name="Amalric Slops", augments={'MP+60','Mag. Acc.+15','"Mag.Atk.Bns."+15',}},
-    feet="Psycloth Boots",
-    neck="Sanctity Necklace",
-    waist="Yamabuki-no-Obi",
-    left_ear="Evans Earring",
-    right_ear="Moonshade Earring",
-    left_ring="Bifrost Ring",
-    right_ring="Sangoma Ring",
-    back={ name="Taranus's Cape", augments={'MP+60','Mag. Acc+20 /Mag. Dmg.+20','MP+20','"Fast Cast"+10',}},}
+    sets.precast.WS['Myrkr'] = {
+		main="Grioavolr",
+		sub="Niobid Strap",
+		ammo="Pemphredo Tathlum",
+		head="Pixie Hairpin +1",
+		body={ name="Witching Robe", augments={'MP+50','Mag. Acc.+15','"Mag.Atk.Bns."+15','"Refresh"+1',}},
+		hands="Amalric Gages",
+		legs={ name="Amalric Slops", augments={'MP+60','Mag. Acc.+15','"Mag.Atk.Bns."+15',}},
+		feet="Psycloth Boots",
+		neck="Sanctity Necklace",
+		waist="Yamabuki-no-Obi",
+		left_ear="Evans Earring",
+		right_ear="Moonshade Earring",
+		left_ring="Bifrost Ring",
+		right_ring="Sangoma Ring",
+		back={ name="Taranus's Cape", augments={'MP+60','Mag. Acc+20 /Mag. Dmg.+20','MP+20','"Fast Cast"+10',}},}
  
     ---- Midcast Sets ----
     sets.midcast.FastRecast = {}
  
     sets.midcast['Healing Magic'] = {}
 
-    sets.midcast['Enhancing Magic'] = {}
+    sets.midcast['Enhancing Magic'] = {
+		main={ name="Grioavolr", augments={'MP+32','Mag. Acc.+30','"Mag.Atk.Bns."+30',}},
+		sub="Niobid Strap",
+		ammo="Pemphredo Tathlum",
+		head={ name="Telchine Cap", augments={'Enh. Mag. eff. dur. +4',}},
+		body={ name="Telchine Chas.", augments={'Enh. Mag. eff. dur. +4',}},
+		hands={ name="Telchine Gloves", augments={'"Fast Cast"+2','Enh. Mag. eff. dur. +10',}},
+		legs={ name="Lengo Pants", augments={'INT+10','Mag. Acc.+15','"Mag.Atk.Bns."+15','"Refresh"+1',}},
+		feet={ name="Telchine Pigaches", augments={'Enh. Mag. eff. dur. +8',}},
+		neck="Loricate Torque +1",
+		waist="Gishdubar Sash",
+		left_ear="Hearty Earring",
+		right_ear="Dominance Earring",
+		left_ring="Stikini Ring",
+		right_ring="Stikini Ring",
+		back="Solemnity Cape",}
  
 	-- I personally do not have gear to alter these abilities as of the time of disseminating this file, but 
 	-- definitely add them here if you have them.
@@ -221,196 +225,249 @@ function init_gear_sets()
     sets.midcast.Aquaveil = {}
     sets.midcast.Stoneskin = {}
  
-    sets.midcast['Enfeebling Magic'] = {main={ name="Lathi", augments={'MP+80','INT+20','"Mag.Atk.Bns."+20',}},
-    sub="Niobid Strap",
-    ammo="Pemphredo Tathlum",
-    head={ name="Merlinic Hood", augments={'Mag. Acc.+24 "Mag.Atk.Bns."+24','Magic burst mdg.+8%','Mag. Acc.+2','"Mag.Atk.Bns."+13',}},
-    body="Merlinic Jubbah",
-    hands="Jhakri Cuffs +1",
-    legs={ name="Merlinic Shalwar", augments={'Mag. Acc.+25 "Mag.Atk.Bns."+25','Mag. crit. hit dmg. +4%','MND+4','Mag. Acc.+11','"Mag.Atk.Bns."+14',}},
-    feet="Jhakri Pigaches +1",
-    neck="Sanctity Necklace",
-    waist="Eschan Stone",
-    left_ear="Barkaro. Earring",
-    right_ear="Dignitary's Earring",
-    left_ring="Stikini Ring",
-    right_ring="Stikini Ring",
-    back={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10',}},}   
+    sets.midcast['Enfeebling Magic'] = {
+		main="Grioavolr",
+		sub="Niobid Strap",
+		ammo="Pemphredo Tathlum",
+		head={ name="Merlinic Hood", augments={'Mag. Acc.+24 "Mag.Atk.Bns."+24','Magic burst mdg.+8%','Mag. Acc.+2','"Mag.Atk.Bns."+13',}},
+		body="Merlinic Jubbah",
+		hands="Jhakri Cuffs +1",
+		legs={ name="Merlinic Shalwar", augments={'Mag. Acc.+25 "Mag.Atk.Bns."+25','Mag. crit. hit dmg. +4%','MND+4','Mag. Acc.+11','"Mag.Atk.Bns."+14',}},
+		feet="Jhakri Pigaches +1",
+		neck="Sanctity Necklace",
+		waist="Eschan Stone",
+		left_ear="Barkaro. Earring",
+		right_ear="Dignitary's Earring",
+		left_ring="Stikini Ring",
+		right_ring="Stikini Ring",
+		back={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10',}},}   
 
-    sets.midcast['Enfeebling Magic'].FreeNuke_Effect = set_combine(sets.midcast['Enfeebling Magic'],{main="Grioavolr",
-    sub="Niobid Strap",
-    ammo="Pemphredo Tathlum",
-    head={ name="Merlinic Hood", augments={'Mag. Acc.+24 "Mag.Atk.Bns."+24','Magic burst mdg.+8%','Mag. Acc.+2','"Mag.Atk.Bns."+13',}},
-    body="Vanya Robe",
-    hands="Lurid Mitts",
-    legs={ name="Psycloth Lappas", augments={'MP+80','Mag. Acc.+15','"Fast Cast"+7',}},
-    feet={ name="Medium's Sabots", augments={'MP+50','MND+8','"Conserve MP"+6','"Cure" potency +3%',}},
-    neck="Henic Torque",
-    waist="Eschan Stone",
-    left_ear="Barkaro. Earring",
-    right_ear="Digni. Earring",
-    left_ring="Stikini Ring",
-    right_ring="Stikini Ring",
-    back={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10',}}})
+    sets.midcast['Enfeebling Magic'].FreeNuke_Effect = set_combine(sets.midcast['Enfeebling Magic'],{
+		main="Grioavolr",
+		sub="Niobid Strap",
+		ammo="Pemphredo Tathlum",
+		head={ name="Merlinic Hood", augments={'Mag. Acc.+24 "Mag.Atk.Bns."+24','Magic burst mdg.+8%','Mag. Acc.+2','"Mag.Atk.Bns."+13',}},
+		body="Vanya Robe",
+		hands="Lurid Mitts",
+		legs={ name="Psycloth Lappas", augments={'MP+80','Mag. Acc.+15','"Fast Cast"+7',}},
+		feet={ name="Medium's Sabots", augments={'MP+50','MND+8','"Conserve MP"+6','"Cure" potency +3%',}},
+		neck="Henic Torque",
+		waist="Eschan Stone",
+		left_ear="Barkaro. Earring",
+		right_ear="Digni. Earring",
+		left_ring="Stikini Ring",
+		right_ring="Stikini Ring",
+		back={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10',}}})
 
-	sets.midcast['Enfeebling Magic'].Occult_Acumen = set_combine(sets.midcast['Enfeebling Magic'],{main="Grioavolr",
-    sub="Niobid Strap",
-    ammo="Pemphredo Tathlum",
-    head={ name="Merlinic Hood", augments={'Mag. Acc.+24 "Mag.Atk.Bns."+24','Magic burst mdg.+8%','Mag. Acc.+2','"Mag.Atk.Bns."+13',}},
-    body="Vanya Robe",
-    hands="Lurid Mitts",
-    legs={ name="Psycloth Lappas", augments={'MP+80','Mag. Acc.+15','"Fast Cast"+7',}},
-    feet={ name="Medium's Sabots", augments={'MP+50','MND+8','"Conserve MP"+6','"Cure" potency +3%',}},
-    neck="Henic Torque",
-    waist="Eschan Stone",
-    left_ear="Barkaro. Earring",
-    right_ear="Digni. Earring",
-    left_ring="Stikini Ring",
-    right_ring="Stikini Ring",
-    back={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10',}}})
+	sets.midcast['Enfeebling Magic'].Occult_Acumen = set_combine(sets.midcast['Enfeebling Magic'],{
+		main="Grioavolr",
+		sub="Niobid Strap",
+		ammo="Pemphredo Tathlum",
+		head={ name="Merlinic Hood", augments={'Mag. Acc.+24 "Mag.Atk.Bns."+24','Magic burst mdg.+8%','Mag. Acc.+2','"Mag.Atk.Bns."+13',}},
+		body="Vanya Robe",
+		hands="Lurid Mitts",
+		legs={ name="Psycloth Lappas", augments={'MP+80','Mag. Acc.+15','"Fast Cast"+7',}},
+		feet={ name="Medium's Sabots", augments={'MP+50','MND+8','"Conserve MP"+6','"Cure" potency +3%',}},
+		neck="Henic Torque",
+		waist="Eschan Stone",
+		left_ear="Barkaro. Earring",
+		right_ear="Digni. Earring",
+		left_ring="Stikini Ring",
+		right_ring="Stikini Ring",
+		back={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10',}}})
 	
 	sets.midcast.ElementalEnfeeble = sets.midcast['Enfeebling Magic']
  
-    sets.midcast['Dark Magic'] = {main={ name="Lathi", augments={'MP+80','INT+20','"Mag.Atk.Bns."+20',}},
-    sub="Niobid Strap",
-    ammo="Pemphredo Tathlum",
-    head={ name="Merlinic Hood", augments={'Mag. Acc.+24 "Mag.Atk.Bns."+24','Magic burst mdg.+8%','Mag. Acc.+2','"Mag.Atk.Bns."+13',}},
-    body="Merlinic Jubbah",
-    hands="Jhakri cuffs +1",
-    legs={ name="Merlinic Shalwar", augments={'Mag. Acc.+25 "Mag.Atk.Bns."+25','Mag. crit. hit dmg. +4%','MND+4','Mag. Acc.+11','"Mag.Atk.Bns."+14',}},
-    feet="Merlinic Crackows",
-    neck="Sanctity Necklace",
-    waist="Fucho-no-Obi",
-    left_ear="Barkaro. Earring",
-    right_ear="Dignitary's Earring",
-    left_ring="Evanescence Ring",
-    right_ring="Sangoma Ring",
-    back={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10',}},}
+    sets.midcast['Dark Magic'] = {
+		main="Grioavolr",
+		sub="Niobid Strap",
+		ammo="Pemphredo Tathlum",
+		head={ name="Merlinic Hood", augments={'Mag. Acc.+24 "Mag.Atk.Bns."+24','Magic burst mdg.+8%','Mag. Acc.+2','"Mag.Atk.Bns."+13',}},
+		body="Merlinic Jubbah",
+		hands="Jhakri cuffs +1",
+		legs={ name="Merlinic Shalwar", augments={'Mag. Acc.+25 "Mag.Atk.Bns."+25','Mag. crit. hit dmg. +4%','MND+4','Mag. Acc.+11','"Mag.Atk.Bns."+14',}},
+		feet="Merlinic Crackows",
+		neck="Sanctity Necklace",
+		waist="Fucho-no-Obi",
+		left_ear="Barkaro. Earring",
+		right_ear="Dignitary's Earring",
+		left_ring="Evanescence Ring",
+		right_ring="Sangoma Ring",
+		back={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10',}},}
  
     -- Elemental Magic sets
      
     sets.midcast['Elemental Magic'] = {
-	main="Grioavolr",
-    sub="Niobid Strap",
-    ammo="Pemphredo Tathlum",
-    head={ name="Merlinic Hood", augments={'Mag. Acc.+24 "Mag.Atk.Bns."+24','Magic burst mdg.+8%','Mag. Acc.+2','"Mag.Atk.Bns."+13',}},
-    body="Merlinic Jubbah",
-    hands={ name="Amalric Gages", augments={'MP+60','Mag. Acc.+15','"Mag.Atk.Bns."+15',}},
-    legs={ name="Merlinic Shalwar", augments={'Mag. Acc.+25 "Mag.Atk.Bns."+25','Mag. crit. hit dmg. +4%','MND+4','Mag. Acc.+11','"Mag.Atk.Bns."+14',}},
-    feet="Merlinic Crackows",
-    neck="Mizu. Kubikazari",
-    waist="Eschan Stone",
-    left_ear="Static Earring",
-    right_ear="Barkaro. Earring",
-    left_ring="Mujin Band",
-    right_ring="Locus Ring",
-    back={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10',}},}
+		main="Grioavolr",
+		sub="Niobid Strap",
+		ammo="Pemphredo Tathlum",
+		head={ name="Merlinic Hood", augments={'Mag. Acc.+24 "Mag.Atk.Bns."+24','Magic burst mdg.+8%','Mag. Acc.+2','"Mag.Atk.Bns."+13',}},
+		body="Merlinic Jubbah",
+		hands={ name="Amalric Gages", augments={'MP+60','Mag. Acc.+15','"Mag.Atk.Bns."+15',}},
+		legs={ name="Merlinic Shalwar", augments={'Mag. Acc.+25 "Mag.Atk.Bns."+25','Mag. crit. hit dmg. +4%','MND+4','Mag. Acc.+11','"Mag.Atk.Bns."+14',}},
+		feet="Merlinic Crackows",
+		neck="Mizu. Kubikazari",
+		waist="Eschan Stone",
+		left_ear="Static Earring",
+		right_ear="Barkaro. Earring",
+		left_ring="Mujin Band",
+		right_ring="Locus Ring",
+		back={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10',}},}
 
-    sets.midcast['Elemental Magic'].FreeNuke_Effect = set_combine(sets.midcast['Elemental Magic'], {main="Grioavolr",
-    sub="Niobid Strap",
-    ammo="Pemphredo Tathlum",
-    head={ name="Merlinic Hood", augments={'Mag. Acc.+24 "Mag.Atk.Bns."+24','Magic burst mdg.+8%','Mag. Acc.+2','"Mag.Atk.Bns."+13',}},
-    body="Merlinic Jubbah",
-    hands={ name="Amalric Gages", augments={'MP+60','Mag. Acc.+15','"Mag.Atk.Bns."+15',}},
-    legs={ name="Merlinic Shalwar", augments={'Mag. Acc.+25 "Mag.Atk.Bns."+25','Mag. crit. hit dmg. +4%','MND+4','Mag. Acc.+11','"Mag.Atk.Bns."+14',}},
-    feet="Merlinic Crackows",
-    neck="Sanctity Necklace",
-    waist="Eschan Stone",
-    left_ear="Friomisi Earring",
-    right_ear="Barkaro. Earring",
-    left_ring="Shiva Ring +1",
-    right_ring="Shiva Ring +1",
-    back={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10',}}})
-    sets.midcast['Elemental Magic'].Occult_Acumen = set_combine(sets.midcast['Elemental Magic'], {main={ name="Lathi", augments={'MP+80','INT+20','"Mag.Atk.Bns."+20',}},
-    sub="Niobid Strap",
-    ammo="Seraphic Ampulla",
-    head={ name="Merlinic Hood", augments={'Mag. Acc.+24','"Occult Acumen"+10','INT+9',}},
-    body="Seidr Cotehardie",
-    hands={ name="Merlinic Dastanas", augments={'Mag. Acc.+20','"Occult Acumen"+11',}},
-    legs={ name="Merlinic Shalwar", augments={'Mag. Acc.+16 "Mag.Atk.Bns."+16','"Occult Acumen"+9','INT+10','"Mag.Atk.Bns."+8',}},
-    feet="Merlinic Crackows",
-    neck="Sanctity Necklace",
-    waist="Eschan Stone",
-    left_ear="Barkaro. Earring",
-    right_ear="Gwati Earring",
-    left_ring="Shiva Ring +1",
-    right_ring="Shiva Ring +1",
-    back={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10',}}})
+    sets.midcast['Elemental Magic'].FreeNuke_Effect = set_combine(sets.midcast['Elemental Magic'], {
+		main="Grioavolr",
+		sub="Niobid Strap",
+		ammo="Pemphredo Tathlum",
+		head={ name="Merlinic Hood", augments={'Mag. Acc.+24 "Mag.Atk.Bns."+24','Magic burst mdg.+8%','Mag. Acc.+2','"Mag.Atk.Bns."+13',}},
+		body="Merlinic Jubbah",
+		hands={ name="Amalric Gages", augments={'MP+60','Mag. Acc.+15','"Mag.Atk.Bns."+15',}},
+		legs={ name="Merlinic Shalwar", augments={'Mag. Acc.+25 "Mag.Atk.Bns."+25','Mag. crit. hit dmg. +4%','MND+4','Mag. Acc.+11','"Mag.Atk.Bns."+14',}},
+		feet="Merlinic Crackows",
+		neck="Sanctity Necklace",
+		waist="Eschan Stone",
+		left_ear="Friomisi Earring",
+		right_ear="Barkaro. Earring",
+		left_ring="Shiva Ring +1",
+		right_ring="Shiva Ring +1",
+		back={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10',}}})
+		
+    sets.midcast['Elemental Magic'].Occult_Acumen = set_combine(sets.midcast['Elemental Magic'], {
+		main="Grioavolr",
+		sub="Niobid Strap",
+		ammo="Seraphic Ampulla",
+		head={ name="Merlinic Hood", augments={'Mag. Acc.+24','"Occult Acumen"+10','INT+9',}},
+		body="Seidr Cotehardie",
+		hands={ name="Merlinic Dastanas", augments={'Mag. Acc.+20','"Occult Acumen"+11',}},
+		legs={ name="Merlinic Shalwar", augments={'Mag. Acc.+16 "Mag.Atk.Bns."+16','"Occult Acumen"+9','INT+10','"Mag.Atk.Bns."+8',}},
+		feet="Merlinic Crackows",
+		neck="Sanctity Necklace",
+		waist="Eschan Stone",
+		left_ear="Barkaro. Earring",
+		right_ear="Gwati Earring",
+		left_ring="Shiva Ring +1",
+		right_ring="Shiva Ring +1",
+		back={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10',}}})
+		
     sets.midcast['Elemental Magic'].HighTierNuke = set_combine(sets.midcast['Elemental Magic'], {})
-    sets.midcast['Elemental Magic'].HighTierNuke.FreeNuke_Effect = set_combine(sets.midcast['Elemental Magic'].HighTierNuke, {main="Grioavolr",
-    sub="Niobid Strap",
-    ammo="Pemphredo Tathlum",
-    head={ name="Merlinic Hood", augments={'Mag. Acc.+24 "Mag.Atk.Bns."+24','Magic burst mdg.+8%','Mag. Acc.+2','"Mag.Atk.Bns."+13',}},
-    body="Merlinic Jubbah",
-    hands={ name="Amalric Gages", augments={'MP+60','Mag. Acc.+15','"Mag.Atk.Bns."+15',}},
-    legs={ name="Merlinic Shalwar", augments={'Mag. Acc.+25 "Mag.Atk.Bns."+25','Mag. crit. hit dmg. +4%','MND+4','Mag. Acc.+11','"Mag.Atk.Bns."+14',}},
-    feet="Merlinic Crackows",
-    neck="Sanctity Necklace",
-    waist="Eschan Stone",
-    left_ear="Friomisi Earring",
-    right_ear="Barkaro. Earring",
-    left_ring="Shiva Ring +1",
-    right_ring="Shiva Ring +1",
-    back={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10',}}})
-    sets.midcast['Elemental Magic'].HighTierNuke.Occult_Acumen = set_combine(sets.midcast['Elemental Magic'].HighTierNuke, {main={ name="Lathi", augments={'MP+80','INT+20','"Mag.Atk.Bns."+20',}},
-    sub="Niobid Strap",
-    ammo="Seraphic Ampulla",
-    head={ name="Merlinic Hood", augments={'Mag. Acc.+24','"Occult Acumen"+10','INT+9',}},
-    body="Seidr Cotehardie",
-    hands={ name="Merlinic Dastanas", augments={'Mag. Acc.+20','"Occult Acumen"+11',}},
-    legs={ name="Merlinic Shalwar", augments={'Mag. Acc.+16 "Mag.Atk.Bns."+16','"Occult Acumen"+9','INT+10','"Mag.Atk.Bns."+8',}},
-    feet="Merlinic Crackows",
-    neck="Sanctity Necklace",
-    waist="Eschan Stone",
-    left_ear="Barkaro. Earring",
-    right_ear="Gwati Earring",
-    left_ring="Shiva Ring +1",
-    right_ring="Shiva Ring +1",
-    back={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10',}}})
- 
-    sets.midcast.Impact = {head=empty,body="Twilight Cloak",hands="Jhakri cuffs +1",
-    legs={ name="Merlinic Shalwar", augments={'Mag. Acc.+25 "Mag.Atk.Bns."+25','Mag. crit. hit dmg. +4%','MND+4','Mag. Acc.+11','"Mag.Atk.Bns."+14',}},
-    feet="Merlinic Crackows",
-    neck="Sanctity Necklace",
-    waist="Hachirin-no-Obi",
-    left_ear="Dignitary's Earring",
-    right_ear="Barkaro. Earring",
-    left_ring="Stikini Ring",
-    right_ring="Stikini Ring",
-    back={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10',}},}
 	
-	sets.midcast['Comet'] = set_combine(sets.midcast['Elemental Magic'], {{ name="Lathi", augments={'MP+80','INT+20','"Mag.Atk.Bns."+20',}},
-    sub="Niobid Strap",
-    ammo="Seraphic Ampulla",
-    head="Pixie Hairpin +1",
-    body="Merlinic Jubbah",
-    hands={ name="Amalric Gages", augments={'MP+60','Mag. Acc.+15','"Mag.Atk.Bns."+15',}},
-    legs={ name="Merlinic Shalwar", augments={'Mag. Acc.+16 "Mag.Atk.Bns."+16','Magic burst mdg.+10%','Mag. Acc.+10','"Mag.Atk.Bns."+14',}},
-    feet="Merlinic Crackows",
-    neck="Mizu. Kubikazari",
-    waist="Eschan Stone",
-    left_ear="Static Earring",
-    right_ear="Barkaro. Earring",
-    left_ring="Archon Ring",
-    right_ring="Mujin Band",
-    back={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10',}}})
+    sets.midcast['Elemental Magic'].HighTierNuke.FreeNuke_Effect = set_combine(sets.midcast['Elemental Magic'].HighTierNuke, {
+		main="Grioavolr",
+		sub="Niobid Strap",
+		ammo="Pemphredo Tathlum",
+		head={ name="Merlinic Hood", augments={'Mag. Acc.+24 "Mag.Atk.Bns."+24','Magic burst mdg.+8%','Mag. Acc.+2','"Mag.Atk.Bns."+13',}},
+		body="Merlinic Jubbah",
+		hands={ name="Amalric Gages", augments={'MP+60','Mag. Acc.+15','"Mag.Atk.Bns."+15',}},
+		legs={ name="Merlinic Shalwar", augments={'Mag. Acc.+25 "Mag.Atk.Bns."+25','Mag. crit. hit dmg. +4%','MND+4','Mag. Acc.+11','"Mag.Atk.Bns."+14',}},
+		feet="Merlinic Crackows",
+		neck="Sanctity Necklace",
+		waist="Eschan Stone",
+		left_ear="Friomisi Earring",
+		right_ear="Barkaro. Earring",
+		left_ring="Shiva Ring +1",
+		right_ring="Shiva Ring +1",
+		back={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10',}}})
+		
+    sets.midcast['Elemental Magic'].HighTierNuke.Occult_Acumen = set_combine(sets.midcast['Elemental Magic'].HighTierNuke, {
+		main="Grioavolr",
+		sub="Niobid Strap",
+		ammo="Seraphic Ampulla",
+		head={ name="Merlinic Hood", augments={'Mag. Acc.+24','"Occult Acumen"+10','INT+9',}},
+		body="Seidr Cotehardie",
+		hands={ name="Merlinic Dastanas", augments={'Mag. Acc.+20','"Occult Acumen"+11',}},
+		legs={ name="Merlinic Shalwar", augments={'Mag. Acc.+16 "Mag.Atk.Bns."+16','"Occult Acumen"+9','INT+10','"Mag.Atk.Bns."+8',}},
+		feet="Merlinic Crackows",
+		neck="Sanctity Necklace",
+		waist="Eschan Stone",
+		left_ear="Barkaro. Earring",
+		right_ear="Gwati Earring",
+		left_ring="Shiva Ring +1",
+		right_ring="Shiva Ring +1",
+		back={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10',}}})
  
-	sets.midcast['Comet'].FreeNuke_Effect = set_combine(sets.midcast['Elemental Magic'], {{ name="Lathi", augments={'MP+80','INT+20','"Mag.Atk.Bns."+20',}},
-    sub="Niobid Strap",
-    ammo="Seraphic Ampulla",
-    head="Pixie Hairpin +1",
-    body="Merlinic Jubbah",
-    hands={ name="Amalric Gages", augments={'MP+60','Mag. Acc.+15','"Mag.Atk.Bns."+15',}},
-    legs={ name="Merlinic Shalwar", augments={'Mag. Acc.+16 "Mag.Atk.Bns."+16','Magic burst mdg.+10%','Mag. Acc.+10','"Mag.Atk.Bns."+14',}},
-    feet="Merlinic Crackows",
-    neck="Sanctity Necklace",
-    waist="Eschan Stone",
-    left_ear="Friomisi Earring",
-    right_ear="Barkaro. Earring",
-    left_ring="Shiva Ring +1",
-    right_ring="Shiva Ring +1",
-    back={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10',}}})
+    sets.midcast.Impact = {
+		head=empty,body="Twilight Cloak",
+		hands="Jhakri cuffs +1",
+		legs={ name="Merlinic Shalwar", augments={'Mag. Acc.+25 "Mag.Atk.Bns."+25','Mag. crit. hit dmg. +4%','MND+4','Mag. Acc.+11','"Mag.Atk.Bns."+14',}},
+		feet="Merlinic Crackows",
+		neck="Sanctity Necklace",
+		waist="Hachirin-no-Obi",
+		left_ear="Dignitary's Earring",
+		right_ear="Barkaro. Earring",
+		left_ring="Stikini Ring",
+		right_ring="Stikini Ring",
+		back={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10',}},}
+	
+	sets.midcast['Comet'] = set_combine(sets.midcast['Elemental Magic'], {
+		sub="Niobid Strap",
+		ammo="Seraphic Ampulla",
+		head="Pixie Hairpin +1",
+		body="Merlinic Jubbah",
+		hands={ name="Amalric Gages", augments={'MP+60','Mag. Acc.+15','"Mag.Atk.Bns."+15',}},
+		legs={ name="Merlinic Shalwar", augments={'Mag. Acc.+16 "Mag.Atk.Bns."+16','Magic burst mdg.+10%','Mag. Acc.+10','"Mag.Atk.Bns."+14',}},
+		feet="Merlinic Crackows",
+		neck="Mizu. Kubikazari",
+		waist="Eschan Stone",
+		left_ear="Static Earring",
+		right_ear="Barkaro. Earring",
+		left_ring="Archon Ring",
+		right_ring="Mujin Band",
+		back={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10',}}})
  
+	sets.midcast['Comet'].FreeNuke_Effect = set_combine(sets.midcast['Elemental Magic'], {
+		sub="Niobid Strap",
+		ammo="Seraphic Ampulla",
+		head="Pixie Hairpin +1",
+		body="Merlinic Jubbah",
+		hands={ name="Amalric Gages", augments={'MP+60','Mag. Acc.+15','"Mag.Atk.Bns."+15',}},
+		legs={ name="Merlinic Shalwar", augments={'Mag. Acc.+16 "Mag.Atk.Bns."+16','Magic burst mdg.+10%','Mag. Acc.+10','"Mag.Atk.Bns."+14',}},
+		feet="Merlinic Crackows",
+		neck="Sanctity Necklace",
+		waist="Eschan Stone",
+		left_ear="Friomisi Earring",
+		right_ear="Barkaro. Earring",
+		left_ring="Shiva Ring +1",
+		right_ring="Shiva Ring +1",
+		back={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10',}}})
+	
+-- These next two sets are used later in the functions to determine what gear will be used in High MP and Low MP situations
+-- SPECIFICALLY for Aspir spells.  In the LowMP set, put your best Aspir+ gear, in the other set put your best Max MP gear.
+-- Find out how much your maximum MP is in each set, and adjust the MP values in the function area accordingly
+-- (CTRL+F: Aspir Handling)
+
+	sets.midcast.HighMP = {
+		main="Grioavolr",
+		sub="Niobid Strap",
+		ammo="Pemphredo Tathlum",
+		head="Pixie Hairpin +1",
+		body={ name="Witching Robe", augments={'MP+50','Mag. Acc.+15','"Mag.Atk.Bns."+15','"Refresh"+1',}},
+		hands="Amalric Gages",
+		legs={ name="Amalric Slops", augments={'MP+60','Mag. Acc.+15','"Mag.Atk.Bns."+15',}},
+		feet="Psycloth Boots",
+		neck="Sanctity Necklace",
+		waist="Yamabuki-no-Obi",
+		left_ear="Barkarole Earring",
+		right_ear="Evans Earring",
+		left_ring="Bifrost Ring",
+		right_ring="Sangoma Ring",
+		back={ name="Taranus's Cape", augments={'MP+60','Mag. Acc+20 /Mag. Dmg.+20','MP+20','"Fast Cast"+10',}},}
+ 
+	sets.midcast.LowMP = {
+		main="Grioavolr",
+		sub="Niobid Strap",
+		ammo="Pemphredo Tathlum",
+		head={ name="Merlinic Hood", augments={'Mag. Acc.+24 "Mag.Atk.Bns."+24','Magic burst mdg.+8%','Mag. Acc.+2','"Mag.Atk.Bns."+13',}},
+		body="Merlinic Jubbah",
+		hands="Jhakri Cuffs +1",
+		legs={ name="Merlinic Shalwar", augments={'Mag. Acc.+25 "Mag.Atk.Bns."+25','Mag. crit. hit dmg. +4%','MND+4','Mag. Acc.+11','"Mag.Atk.Bns."+14',}},
+		feet="Merlinic Crackows",
+		neck="Sanctity Necklace",
+		waist="Fucho-no-Obi",
+		left_ear="Barkaro. Earring",
+		right_ear="Gwati Earring",
+		left_ring="Evanescence Ring",
+		right_ring="Sangoma Ring",
+		back={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10',}},}
+		
     --Set to be equipped when Day/Weather match current spell element
 
     sets.Obi = {waist='Hachirin-no-Obi'}
@@ -422,41 +479,42 @@ function init_gear_sets()
     sets.resting = {}
  
     -- Idle sets: Make general idle set a max MP set, later hooks will handle the rest of your refresh sets, but
-	-- remember to alter the latent_refresh sets (Ctrl+F to find them)
+	-- remember to alter the refresh sets (Ctrl+F to find them)
 
-    sets.idle = {main={ name="Lathi", augments={'MP+80','INT+20','"Mag.Atk.Bns."+20',}},
-    sub="Niobid Strap",
-    ammo="Pemphredo Tathlum",
-    head="Pixie Hairpin +1",
-    body={ name="Witching Robe", augments={'MP+50','Mag. Acc.+15','"Mag.Atk.Bns."+15','"Refresh"+1',}},
-    hands="Amalric Gages",
-    legs={ name="Amalric Slops", augments={'MP+60','Mag. Acc.+15','"Mag.Atk.Bns."+15',}},
-    feet="Psycloth boots",
-    neck="Sanctity Necklace",
-    waist="Yamabuki-no-Obi",
-    left_ear="Evans Earring",
-    right_ear="Loquac. Earring",
-    left_ring="Bifrost Ring",
-    right_ring="Sangoma Ring",
-    back={ name="Taranus's Cape", augments={'MP+60','Mag. Acc+20 /Mag. Dmg.+20','MP+20','"Fast Cast"+10',}},}
+    sets.idle = {
+		main="Grioavolr",
+		sub="Niobid Strap",
+		ammo="Pemphredo Tathlum",
+		head="Pixie Hairpin +1",
+		body={ name="Witching Robe", augments={'MP+50','Mag. Acc.+15','"Mag.Atk.Bns."+15','"Refresh"+1',}},
+		hands="Amalric Gages",
+		legs={ name="Amalric Slops", augments={'MP+60','Mag. Acc.+15','"Mag.Atk.Bns."+15',}},
+		feet="Psycloth boots",
+		neck="Sanctity Necklace",
+		waist="Yamabuki-no-Obi",
+		left_ear="Evans Earring",
+		right_ear="Loquac. Earring",
+		left_ring="Bifrost Ring",
+		right_ring="Sangoma Ring",
+		back={ name="Taranus's Cape", augments={'MP+60','Mag. Acc+20 /Mag. Dmg.+20','MP+20','"Fast Cast"+10',}},}
  
     -- Idle mode that keeps PDT gear on, but doesn't prevent normal gear swaps for precast/etc.
-    sets.idle.PDT = {main={ name="Lathi", augments={'MP+80','INT+20','"Mag.Atk.Bns."+20',}},
-    sub="Niobid Strap",
-    ammo="Pemphredo Tathlum",
-    head="Pixie Hairpin +1",
-    body={ name="Witching Robe", augments={'MP+50','Mag. Acc.+15','"Mag.Atk.Bns."+15','"Refresh"+1',}},
-    hands="Amalric Gages",
-    legs={ name="Amalric Slops", augments={'MP+60','Mag. Acc.+15','"Mag.Atk.Bns."+15',}},
-    feet="Psycloth Boots",
-    feet="Psycloth boots",
-    neck="Sanctity Necklace",
-    waist="Yamabuki-no-Obi",
-    left_ear="Evans Earring",
-    right_ear="Loquac. Earring",
-    left_ring="Bifrost Ring",
-    right_ring="Sangoma Ring",
-    back={ name="Taranus's Cape", augments={'MP+60','Mag. Acc+20 /Mag. Dmg.+20','MP+20','"Fast Cast"+10',}},}
+    sets.idle.PDT = {
+		main="Terra's Staff",
+		sub="Niobid Strap",
+		ammo="Pemphredo Tathlum",
+		head="Kaabnax Hat",
+		body="Merlinic Jubbah",
+		hands="Hagondes Cuffs +1",
+		legs={ name="Hagondes Pants +1", augments={'Phys. dmg. taken -4%',}},
+		feet="Battlecast Gaiters",
+		neck="Loricate Torque +1",
+		waist="Slipor Sash",
+		left_ear="Merman's Earring",
+		right_ear="Merman's Earring",
+		left_ring={ name="Dark Ring", augments={'Phys. dmg. taken -6%','Magic dmg. taken -4%',}},
+		right_ring="Defending Ring",
+		back="Solemnity Cape"}
      
     sets.Adoulin = {
         body="Councilor's Garb",
@@ -476,96 +534,103 @@ function init_gear_sets()
     --- PDT set is designed to be used for MP total set, MDT can be used for whatever you like but in MDT mode
 	--- the player.mp arguments will likely stop working properly
 	
-    sets.defense.PDT = {main={ name="Lathi", augments={'MP+80','INT+20','"Mag.Atk.Bns."+20',}},
-    sub="Niobid Strap",
-    ammo="Pemphredo Tathlum",
-    head="Pixie Hairpin +1",
-    body={ name="Witching Robe", augments={'MP+50','Mag. Acc.+15','"Mag.Atk.Bns."+15','"Refresh"+1',}},
-    hands="Amalric Gages",
-    legs={ name="Amalric Slops", augments={'MP+60','Mag. Acc.+15','"Mag.Atk.Bns."+15',}},
-    feet="Psycloth Boots",
-    neck="Sanctity Necklace",
-    waist="Yamabuki-no-Obi",
-    feet="Psycloth boots",
-    left_ear="Evans Earring",
-    right_ear="Loquac. Earring",
-    left_ring="Bifrost Ring",
-    right_ring="Sangoma Ring",
-    back={ name="Taranus's Cape", augments={'MP+60','Mag. Acc+20 /Mag. Dmg.+20','MP+20','"Fast Cast"+10',}},}
+    sets.defense.PDT = {
+		main="Terra's Staff",
+		sub="Niobid Strap",
+		ammo="Pemphredo Tathlum",
+		head="Kaabnax Hat",
+		body="Merlinic Jubbah",
+		hands="Hagondes Cuffs +1",
+		legs={ name="Hagondes Pants +1", augments={'Phys. dmg. taken -4%',}},
+		feet="Battlecast Gaiters",
+		neck="Loricate Torque +1",
+		waist="Slipor Sash",
+		left_ear="Merman's Earring",
+		right_ear="Merman's Earring",
+		left_ring={ name="Dark Ring", augments={'Phys. dmg. taken -6%','Magic dmg. taken -4%',}},
+		right_ring="Defending Ring",
+		back="Solemnity Cape"}
  
-    sets.defense.MDT = {main="Grioavolr",
-    sub="Niobid Strap",
-    ammo="Pemphredo Tathlum",
-    head={ name="Merlinic Hood", augments={'Mag. Acc.+24 "Mag.Atk.Bns."+24','Magic burst mdg.+8%','Mag. Acc.+2','"Mag.Atk.Bns."+13',}},
-    body="Merlinic Jubbah",
-    hands={ name="Amalric Gages", augments={'MP+60','Mag. Acc.+15','"Mag.Atk.Bns."+15',}},
-    legs={ name="Merlinic Shalwar", augments={'Mag. Acc.+25 "Mag.Atk.Bns."+25','Mag. crit. hit dmg. +4%','MND+4','Mag. Acc.+11','"Mag.Atk.Bns."+14',}},
-    feet="Merlinic Crackows",
-    neck="Mizu. Kubikazari",
-    waist="Hachirin-no-Obi",
-    left_ear="Static Earring",
-    right_ear="Barkaro. Earring",
-    left_ring="Mujin Band",
-    right_ring="Locus Ring",
-    back={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10',}},}
+    sets.defense.MDT = {
+		main="Grioavolr",
+		sub="Niobid Strap",
+		ammo="Pemphredo Tathlum",
+		head={ name="Merlinic Hood", augments={'Mag. Acc.+24 "Mag.Atk.Bns."+24','Magic burst mdg.+8%','Mag. Acc.+2','"Mag.Atk.Bns."+13',}},
+		body="Merlinic Jubbah",
+		hands={ name="Amalric Gages", augments={'MP+60','Mag. Acc.+15','"Mag.Atk.Bns."+15',}},
+		legs={ name="Merlinic Shalwar", augments={'Mag. Acc.+25 "Mag.Atk.Bns."+25','Mag. crit. hit dmg. +4%','MND+4','Mag. Acc.+11','"Mag.Atk.Bns."+14',}},
+		feet="Merlinic Crackows",
+		neck="Mizu. Kubikazari",
+		waist="Hachirin-no-Obi",
+		left_ear="Static Earring",
+		right_ear="Barkaro. Earring",
+		left_ring="Mujin Band",
+		right_ring="Locus Ring",
+		back={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10',}},}
  
     sets.Kiting = {feet="Herald's Gaiters"}
 	
-	sets.latent_refresh2 = {waist="Fucho-no-Obi"}
-    sets.latent_refresh = {main={ name="Lathi", augments={'MP+80','INT+20','"Mag.Atk.Bns."+20',}},
-    sub="Niobid Strap",
-    ammo="Pemphredo Tathlum",
-    head="Pixie Hairpin +1",
-    body={ name="Witching Robe", augments={'MP+50','Mag. Acc.+15','"Mag.Atk.Bns."+15','"Refresh"+1',}},
-    hands="Serpentes Cuffs",
-    legs="Assid. Pants +1",
-    feet="Serpentes Sabots",
-    neck="Sanctity Necklace",
-    waist="Yamabuki-no-Obi",
-    left_ear="Evans Earring",
-    right_ear="Loquac. Earring",
-    left_ring="Bifrost Ring",
-    right_ring="Sangoma Ring",
-    back={ name="Taranus's Cape", augments={'MP+60','Mag. Acc+20 /Mag. Dmg.+20','MP+20','"Fast Cast"+10',}},}
+	sets.latent_refresh = {waist="Fucho-no-Obi"}
+	
+	sets.auto_refresh = {
+		main="Grioavolr",
+		sub="Niobid Strap",
+		ammo="Pemphredo Tathlum",
+		head="Pixie Hairpin +1",
+		body={ name="Witching Robe", augments={'MP+50','Mag. Acc.+15','"Mag.Atk.Bns."+15','"Refresh"+1',}},
+		hands={ name="Merlinic Dastanas", augments={'Pet: DEX+3','AGI+5','"Refresh"+1','Accuracy+16 Attack+16',}},
+		legs="Assid. Pants +1",
+		feet={ name="Merlinic Crackows", augments={'Accuracy+1 Attack+1','"Cure" spellcasting time -2%','"Refresh"+1',}},
+		neck="Sanctity Necklace",
+		waist="Yamabuki-no-Obi",
+		left_ear="Evans Earring",
+		right_ear="Loquac. Earring",
+		left_ring="Bifrost Ring",
+		right_ring="Sangoma Ring",
+		back={ name="Taranus's Cape", augments={'MP+60','Mag. Acc+20 /Mag. Dmg.+20','MP+20','"Fast Cast"+10',}},}
  
     -- Mana Wall idle set
 
-    sets.buff['Mana Wall'] = {main="Terra's Staff",
-    sub="Niobid Strap",
-    ammo="Pemphredo Tathlum",
-    head="Kaabnax Hat",
-    body="Merlinic Jubbah",
-    hands="Hagondes Cuffs +1",
-    legs={ name="Hagondes Pants +1", augments={'Phys. dmg. taken -4%',}},
-    feet="Wicce Sabots +1",
-    neck="Loricate Torque +1",
-    waist="Slipor Sash",
-    left_ear="Merman's Earring",
-    right_ear="Merman's Earring",
-    left_ring={ name="Dark Ring", augments={'Phys. dmg. taken -6%','Magic dmg. taken -4%',}},
-    right_ring={ name="Dark Ring", augments={'Enemy crit. hit rate -2','Phys. dmg. taken -5%','Magic dmg. taken -5%',}},
-    back={ name="Taranus's Cape", augments={'MP+60','Mag. Acc+20 /Mag. Dmg.+20','MP+20','"Fast Cast"+10',}},}
+    sets.buff['Mana Wall'] = {
+		main="Terra's Staff",
+		sub="Niobid Strap",
+		ammo="Pemphredo Tathlum",
+		head="Kaabnax Hat",
+		body="Merlinic Jubbah",
+		hands="Hagondes Cuffs +1",
+		legs={ name="Hagondes Pants +1", augments={'Phys. dmg. taken -4%',}},
+		feet="Wicce Sabots +1",
+		neck="Loricate Torque +1",
+		waist="Slipor Sash",
+		left_ear="Merman's Earring",
+		right_ear="Merman's Earring",
+		left_ring={ name="Dark Ring", augments={'Phys. dmg. taken -6%','Magic dmg. taken -4%',}},
+		right_ring="Defending Ring",
+		back={ name="Taranus's Cape", augments={'MP+60','Mag. Acc+20 /Mag. Dmg.+20','MP+20','"Fast Cast"+10',}},}
  
     -- Engaged sets
  
     -- Set is designed for engaging a monster before pop to ensure you are at maximum MP value when Geas Fete triggers an MP refill.
+	-- This is mostly used in this lua in situations where a fight is about to be initiated and you arent above whatever the maximum
+	-- value for your idle set is.  Another simple way around this is to simply make a macro to equip the gear before the fight starts.
 	
-	sets.engaged = {main={ name="Lathi", augments={'MP+80','INT+20','"Mag.Atk.Bns."+20',}},
-    sub="Niobid Strap",
-    ammo="Pemphredo Tathlum",
-    head="Pixie Hairpin +1",
-    body={ name="Witching Robe", augments={'MP+50','Mag. Acc.+15','"Mag.Atk.Bns."+15','"Refresh"+1',}},
-    hands="Amalric Gages",
-    legs={ name="Amalric Slops", augments={'MP+60','Mag. Acc.+15','"Mag.Atk.Bns."+15',}},
-    feet="Psycloth Boots",
-    neck="Sanctity Necklace",
-    feet="Psycloth boots",
-    waist="Yamabuki-no-Obi",
-    left_ear="Evans Earring",
-    right_ear="Loquac. Earring",
-    left_ring="Bifrost Ring",
-    right_ring="Sangoma Ring",
-    back={ name="Taranus's Cape", augments={'MP+60','Mag. Acc+20 /Mag. Dmg.+20','MP+20','"Fast Cast"+10',}},}
+	sets.engaged = {
+		main="Grioavolr",
+		sub="Niobid Strap",
+		ammo="Pemphredo Tathlum",
+		head="Pixie Hairpin +1",
+		body={ name="Witching Robe", augments={'MP+50','Mag. Acc.+15','"Mag.Atk.Bns."+15','"Refresh"+1',}},
+		hands="Amalric Gages",
+		legs={ name="Amalric Slops", augments={'MP+60','Mag. Acc.+15','"Mag.Atk.Bns."+15',}},
+		feet="Psycloth Boots",
+		neck="Sanctity Necklace",
+		feet="Psycloth boots",
+		waist="Yamabuki-no-Obi",
+		left_ear="Evans Earring",
+		right_ear="Loquac. Earring",
+		left_ring="Bifrost Ring",
+		right_ring="Sangoma Ring",
+		back={ name="Taranus's Cape", augments={'MP+60','Mag. Acc+20 /Mag. Dmg.+20','MP+20','"Fast Cast"+10',}},}
 end
 -------------------------------------------------------------------------------------------------------------------
 -- Job-specific hooks for standard casting events.
@@ -575,25 +640,24 @@ end
 --- handled on thier own. What you need to change is the player.mp value to match slightly under what your max
 --- MP is in your standard fast cast set. The set is designed to Dynamically switch fast cast sets to sets that
 --- preserve your MP total if you are above the amount at which equiping your standard set would decrease your
---- maximum MP. You also must put respective fast cast sets as a brute force equip like I have them listed below
---- or this function will not work properly. Same goes for the Aspir sets.
+--- maximum MP. Due to a rework in how these arguments are organised, all gearsets are being handled above the
+--- function block for this file.
  
 function job_precast(spell, action, spellMap, eventArgs)
     enable('feet','back')
-	if player.mp > 1650 then
-	sets.precast.FC = set_combine(sets.precast.FC, {main="Lathi",ammo="Pemphredo Tathlum",
-        head="Nahtirah hat",neck="Orunmila's Torque",ear2="Loquacious Earring",ear1="Evans Earring",
-        body="Helios Jacket",hands="Helios gloves",ring1="Sangoma Ring",ring2="Bifrost Ring",
-        back={ name="Taranus's Cape", augments={'MP+60','Mag. Acc+20 /Mag. Dmg.+20','MP+20','"Fast Cast"+10',}},waist="Hachirin-no-Obi",legs="Psycloth Lappas",feet="Regal pumps +1"})
-		elseif player.mp < 1650 then
-		sets.precast.FC = set_combine(sets.precast.FC, {main="Marin Staff",ammo="Pemphredo Tathlum",
-        head="Nahtirah hat",neck="Orunmila's Torque",ear2="Loquacious Earring",
-        body="Anhur Robe",hands="Helios gloves",ring1="Prolix Ring",
-        back={ name="Taranus's Cape", augments={'MP+60','Mag. Acc+20 /Mag. Dmg.+20','MP+20','"Fast Cast"+10',}},waist="Witful Belt",legs="Psycloth Lappas",feet="Regal pumps +1"})
-		end
 	end
 
 function job_post_precast(spell, action, spellMap, eventArgs)
+	if player.mp > 2000 and state.VorsealMode.value == 'Vorseal' then
+	equip(sets.precast.FC.HighMP)
+	elseif player.mp < 2000 and state.VorsealMode.value == 'Vorseal' then
+	equip(sets.precast.FC)
+	elseif player.mp > 1650 and state.VorsealMode.value == 'Normal' then
+	equip(sets.precast.FC.HighMP)
+	elseif player.mp < 1650 and state.VorsealMode.value == 'Normal' then
+	equip(sets.precast.FC)
+end
+
 if spell.english == "Impact" then
         equip({head=empty,body="Twilight Cloak"})
     elseif spellMap == 'Cure' or spellMap == 'Curaga' then
@@ -606,8 +670,9 @@ function job_midcast(spell, action, spellMap, eventArgs)
 
 -- This section is for you to define at what value your Aspir sets will change. This is to let your aspirs
 -- get you into your death idle and higher MP values. This number should be around 100 MP lower than the
--- Fast cast argument above this to prevent looping. As said before you must put in your gear here as well
--- just like I have it listed or else this argument will not work.
+-- Fast cast argument above this to prevent looping. The intent is to ensure that if you use aspir while you
+-- are already above a value defined in this section then it will put on your highest MP set, capping you off
+-- rather than simply capping you to whatever your Aspir potency set's max MP value happens to be.
 
     if spell.action_type == 'Magic' then
 			if spell.element == world.weather_element or spell.element == world.day_element then
@@ -617,44 +682,21 @@ function job_midcast(spell, action, spellMap, eventArgs)
                 equip(sets.midcast['Death'])
 			end
 	end
-	if spell.action_type == 'Magic' then
-	if player.mp < 1640 then
-		sets.midcast['Dark Magic'] = set_combine(sets.midcast['Dark Magic'], {main={ name="Lathi", augments={'MP+80','INT+20','"Mag.Atk.Bns."+20',}},
-		sub="Niobid Strap",
-		ammo="Pemphredo Tathlum",
-		head={ name="Merlinic Hood", augments={'Mag. Acc.+24 "Mag.Atk.Bns."+24','Magic burst mdg.+8%','Mag. Acc.+2','"Mag.Atk.Bns."+13',}},
-		body="Merlinic Jubbah",
-		hands="Jhakri Cuffs +1",
-		legs={ name="Merlinic Shalwar", augments={'Mag. Acc.+25 "Mag.Atk.Bns."+25','Mag. crit. hit dmg. +4%','MND+4','Mag. Acc.+11','"Mag.Atk.Bns."+14',}},
-		feet="Merlinic Crackows",
-		neck="Sanctity Necklace",
-		waist="Fucho-no-Obi",
-		left_ear="Barkaro. Earring",
-		right_ear="Gwati Earring",
-		left_ring="Evanescence Ring",
-		right_ring="Sangoma Ring",
-		back={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10',}},})
-	elseif spell.english == 'Aspir' or spell.english == 'Aspir II' or spell.english == 'Aspir III' and player.mp > 1640 then
-		sets.midcast['Dark Magic'] = set_combine(sets.midcast['Dark Magic'], {main={ name="Lathi", augments={'MP+80','INT+20','"Mag.Atk.Bns."+20',}},
-		sub="Niobid Strap",
-		ammo="Pemphredo Tathlum",
-		head="Pixie Hairpin +1",
-		body={ name="Witching Robe", augments={'MP+50','Mag. Acc.+15','"Mag.Atk.Bns."+15','"Refresh"+1',}},
-		hands="Amalric Gages",
-		legs={ name="Amalric Slops", augments={'MP+60','Mag. Acc.+15','"Mag.Atk.Bns."+15',}},
-		feet="Psycloth Boots",
-		neck="Sanctity Necklace",
-		waist="Yamabuki-no-Obi",
-		left_ear="Barkarole Earring",
-		right_ear="Evans Earring",
-		left_ring="Bifrost Ring",
-		right_ring="Sangoma Ring",
-		back={ name="Taranus's Cape", augments={'MP+60','Mag. Acc+20 /Mag. Dmg.+20','MP+20','"Fast Cast"+10',}},})
-		end
-	end
  end
 
+ -- Aspir Handling
+ 
 function job_post_midcast(spell, action, spellMap, eventArgs)
+	if spell.english == 'Aspir' or spell.english == 'Aspir II' or spell.english == 'Aspir III' and state.VorsealMode.value == 'Vorseal' and player.mp > 1910 then
+	equip(sets.midcast.HighMP)
+	elseif spell.english == 'Aspir' or spell.english == 'Aspir II' or spell.english == 'Aspir III' and state.VorsealMode.value == 'Vorseal' and player.mp < 1910 then
+	equip(sets.midcast.LowMP)
+	elseif spell.english == 'Aspir' or spell.english == 'Aspir II' or spell.english == 'Aspir III' and state.VorsealMode.value == 'Normal' and player.mp > 1640 then
+	equip(sets.midcast.HighMP)
+	elseif spell.english == 'Aspir' or spell.english == 'Aspir II' or spell.english == 'Aspir III' and state.VorsealMode.value == 'Normal' and player.mp < 1640 then
+	equip(sets.midcast.LowMP)
+	end
+	
     if spell.element == world.day_element or spell.element == world.weather_element then
         if string.find(spell.english,'helix') then
             equip(sets.midcast.Helix)
@@ -662,7 +704,7 @@ function job_post_midcast(spell, action, spellMap, eventArgs)
             equip(sets.Obi)
         end
     end
-	if spell.skill == 'Elemental Magic' and player.mp < 520 then
+	if spell.skill == 'Elemental Magic' and (player.mp-spell.mp_cost) < 436 then
 		equip(sets.ConsMP)
 		end
 	if spell.skill == 'Enfeebling Magic' and state.HybridMode ~= 'Resist' then
@@ -670,12 +712,10 @@ function job_post_midcast(spell, action, spellMap, eventArgs)
 	end
 end
  
- --	if buffactive['Elemental Seal'] and spell.skill == 'Elemental Magic' and state.HybridMode ~= 'Resist' then
- --	equip(sets.midcast['Enfeebling Magic'].Effect)
- --	end
- 
- --	if spell.skill == 'Enfeebling Magic' and state.HybridMode ~= 'Resist' then
- --	equip(sets.midcast['Enfeebling Magic'])
+-- Duration arguments
+-- Below you can include wait inputs for all spells that you are interested in having timers for
+-- For the sake of brevity, I've only included crowd control spells into this list, but following
+-- the same general format you should be able to intuitively include whatever you like.
  
 function job_aftercast(spell, action, spellMap, eventArgs)
     -- Lock feet after using Mana Wall.
@@ -742,45 +782,6 @@ function refine_various_spells(spell, action, spellMap, eventArgs)
  
     local spell_index
  
-    if spell_recasts[spell.recast_id] > 0 then
-        if spell.skill == 'Elemental Magic' then
-            local ele = tostring(spell.element):append('ga')
-            --local ele2 = string.sub(ele,1,-2)
-            if table.find(degrade_array[ele],spell.name) then
-                spell_index = table.find(degrade_array[ele],spell.name)
-                if spell_index > 1 then
-                    newSpell = degrade_array[ele][spell_index - 1]
-                    add_to_chat(8,spell.name..' Canceled: ['..player.mp..'/'..player.max_mp..'MP::'..player.mpp..'%] Casting '..newSpell..' instead.')
-                    send_command('@input /ma '..newSpell..' '..tostring(spell.target.raw))
-                    eventArgs.cancel = true
-                end
-            else 
-                spell_index = table.find(degrade_array[spell.element],spell.name)
-                if spell_index > 1 then
-                    newSpell = degrade_array[spell.element][spell_index - 1]
-                    add_to_chat(8,spell.name..' Canceled: ['..player.mp..'/'..player.max_mp..'MP::'..player.mpp..'%] Casting '..newSpell..' instead.')
-                    send_command('@input /ma '..newSpell..' '..tostring(spell.target.raw))
-                    eventArgs.cancel = true
-                end
-            end
-        elseif aspirs:contains(spell.name) then
-            spell_index = table.find(degrade_array['Aspirs'],spell.name)
-            if spell_index > 1 then
-                newSpell = degrade_array['Aspirs'][spell_index - 1]
-                add_to_chat(8,spell.name..' Canceled: ['..player.mp..'/'..player.max_mp..'MP::'..player.mpp..'%] Casting '..newSpell..' instead.')
-                send_command('@input /ma '..newSpell..' '..tostring(spell.target.raw))
-                eventArgs.cancel = true
-            end
-        elseif sleepgas:contains(spell.name) then
-            spell_index = table.find(degrade_array['Sleepgas'],spell.name)
-            if spell_index > 1 then
-                newSpell = degrade_array['Sleepgas'][spell_index - 1]
-                add_to_chat(8,spell.name..' Canceled: ['..player.mp..'/'..player.max_mp..'MP::'..player.mpp..'%] Casting '..newSpell..' instead.')
-                send_command('@input /ma '..newSpell..' '..tostring(spell.target.raw))
-                eventArgs.cancel = true
-            end
-        end
-    end
 end
 
 mov = {counter=0}
@@ -801,7 +802,9 @@ end
 moving = false
 windower.raw_register_event('prerender',function()
     mov.counter = mov.counter + 1;
-    if mov.counter>15 then
+	if buffactive['Mana Wall'] then
+		moving = false
+    elseif mov.counter>15 then
         local pl = windower.ffxi.get_mob_by_index(player.index)
         if pl and pl.x and mov.x then
             dist = math.sqrt( (pl.x-mov.x)^2 + (pl.y-mov.y)^2 + (pl.z-mov.z)^2 )
@@ -813,7 +816,7 @@ windower.raw_register_event('prerender',function()
                     send_command('gs equip sets.Adoulin')
                 end
 
-                moving = true
+        moving = true
 
             elseif dist < 1 and moving then
                 state.Moving.value = false
@@ -840,12 +843,17 @@ end)
 -- gain == true if the buff was gained, false if it was lost.
 function job_buff_change(buff, gain)
 	if buff == "Vorseal" then
-	send_command('gs l blm2.lua')
+	send_command('gs c cycle VorsealMode')
+	elseif buff == "Vorseal" and not gain then
+	send_command('gs c cycle VorsealMode')
 	end
 	if buff == "Visitant" then
 	send_command('gs l blm3.lua')
 	end
     -- Unlock feet when Mana Wall buff is lost.
+	if buff == "Mana Wall" then
+	send_command('wait 0.5;gs c update')
+	end
     if buff == "Mana Wall" and not gain then
         enable('feet','back')
         handle_equipping_gear(player.status)
@@ -955,14 +963,21 @@ end
 -- Modify the default idle set after it was constructed.
 --- This is where I handle Death Mode Idle set construction, rather than weave it into the Idle state var
 function customize_idle_set(idleSet)
-	if player.mpp < 51 then
-		idleSet = set_combine(sets.latent_refresh, sets.latent_refresh2)
-		elseif player.mp < 1650 then
-			idleSet = set_combine(idleSet, sets.latent_refresh)	
-	end
-    if buffactive['Mana Wall'] then
+	if buffactive['Mana Wall'] then
         idleSet = sets.buff['Mana Wall']
-    end
+	elseif player.mpp < 51 and state.IdleMode.value == 'PDT' then
+			idleSet = sets.idle.PDT
+	elseif player.mpp < 51 and state.IdleMode.value == 'Normal' then
+		idleSet = set_combine(sets.auto_refresh, sets.latent_refresh)		
+	elseif player.mp < 2050 and state.VorsealMode.value == 'Vorseal' and state.IdleMode.value == 'PDT' then
+			idleSet = sets.idle.PDT
+	elseif player.mp < 2050 and state.VorsealMode.value == 'Vorseal' then
+			idleSet = sets.auto_refresh
+	elseif player.mp < 1650 and state.VorsealMode.value == 'Normal' and state.IdleMode.value == 'PDT' then
+			idleSet = sets.idle.PDT
+	elseif player.mp < 1650 and state.VorsealMode.value == 'Normal' and state.IdleMode.value == 'Normal' then
+			idleSet = sets.auto_refresh
+	end
     return idleSet
 end
 --- This is where I handle Death Mode Melee set modifications
@@ -981,4 +996,8 @@ end
 -- Select default macro book on initial load or subjob change.
 function select_default_macro_book()
     set_macro_page(9, 4)
+	-- Do not remove below argument or the file WILL NOT WORK PROPERLY when reloaded in an escha area--
+	if buffactive['Vorseal'] and state.VorsealMode.value == 'Normal' then
+	send_command('gs c cycle VorsealMode')
+	end
 end
