@@ -1,0 +1,689 @@
+ include('organizer-lib')
+ --  Author Verbannt - Asura (minor and massive changes to arguments and over all flow of the lua)
+-------------------------------------------------------------------------------------------------------------------
+-- Setup functions for this job.  Generally should not be modified.
+-------------------------------------------------------------------------------------------------------------------
+
+-- Initialization function for this job file.
+function get_sets()
+    mote_include_version = 2
+
+    -- Load and initialize the include file.
+    include('Mote-Include.lua')
+end
+
+-- Setup vars that are user-independent.  state.Buff vars initialized here will automatically be tracked.
+function job_setup()
+    state.Buff.Sentinel = buffactive.sentinel or false
+    state.Buff.Cover = buffactive.cover or false
+    state.Buff.Doom = buffactive.Doom or false
+	
+	state.Moving  = M(false, "moving")
+end	
+
+
+-------------------------------------------------------------------------------------------------------------------
+-- User setup functions for this job.  Recommend that these be overridden in a sidecar file.
+-------------------------------------------------------------------------------------------------------------------
+
+-- Setup vars that are user-dependent.  Can override this function in a sidecar file.
+function user_setup()
+    state.OffenseMode:options('Normal', 'Acc')
+    state.HybridMode:options('Normal', 'PDT', 'Reraise')
+    state.WeaponskillMode:options('Normal', 'Acc')
+    state.CastingMode:options('Normal', 'Resistant')
+    state.PhysicalDefenseMode:options('PDT', 'HP', 'Block', 'ACC' , 'Reraise', 'Charm')
+    state.MagicalDefenseMode:options('MDT', 'HP', 'Block', 'ACC' , 'Reraise', 'Charm')
+    
+    state.ExtraDefenseMode = M{['description']='Extra Defense Mode', 'None', 'MP', 'Knockback', 'MP_Knockback'}
+    state.EquipShield = M(false, 'Equip Shield w/Defense')
+
+    update_defense_mode()
+															--In game macro copy / paste if you want.
+    send_command('bind ^f11 gs c cycle MagicalDefenseMode') -- /console gearswap c cycle MagicalDefenseMode
+    --              Define what set to be in when F11 is pressed or   /console gearswap c set DefenseMode Magical
+	send_command('bind !f11 gs c cycle ExtraDefenseMode')   -- /console gearswap c cycle ExtraDefenseMode
+     --			  Define what Back piece should take prioriry   
+	send_command('bind @f10 gs c toggle EquipShield')		-- /console gearswap c toggle EquipShield
+--   Define If shields (aegis or ochain etc)
+--	should be changed if DefenseMode goes from Physical / Magical
+	send_command('bind ^` gs c toggle EquipShield')			
+--                   Same function as above different keys on keyboard
+    select_default_macro_book()
+--		^f10 cycles what Physical DefenseMode is                   --/console gearswap c set DefenseMode Physical
+end
+
+function user_unload()
+    send_command('unbind ^f11')
+    send_command('unbind !f11')
+    send_command('unbind @f10')
+    send_command('unbind @f11')
+end
+
+
+-- Define sets and vars used by this job file.
+function init_gear_sets()
+    --------------------------------------
+    -- Precast sets
+    --------------------------------------
+    
+    -- Precast sets to enhance JAs
+    sets.precast.JA['Invincible'] = {legs="Caballarius Breeches"}
+    sets.precast.JA['Holy Circle'] = {feet="Reverence Leggings +2"}
+    sets.precast.JA['Shield Bash'] = {head="Otomi Helm",neck="Fotia Gorget",ear1="Brutal Earring",ear2="Moonshade Earring",
+        body="Uac Jerkin",hands={ name="Odyssean Gauntlets", augments={'Mag. Acc.+9 "Mag.Atk.Bns."+9','Accuracy+18','"Treasure Hunter"+1','Accuracy+13 Attack+13',}},ring1="Rajas Ring",ring2="K'ayres ring",
+        back="Rancorous Mantle",waist="Chaac Belt",legs={ name="Odyssean Cuisses", augments={'Accuracy+21 Attack+21','VIT+4','"Treasure Hunter"+1',}},feet={ name="Odyssean Greaves", augments={'Mag. Acc.+17 "Mag.Atk.Bns."+17','"Fast Cast"+1','"Treasure Hunter"+1',}}}
+    sets.precast.JA['Sentinel'] = {feet="Caballarius Leggings"}
+    sets.precast.JA['Rampart'] = {head="Caballarius Coronet"}
+    sets.precast.JA['Fealty'] = {body="Caballarius Surcoat"}
+    sets.precast.JA['Divine Emblem'] = {feet="Creed Sabatons +2"}
+    sets.precast.JA['Cover'] = {head="Reverence Coronet +2"}
+
+    -- add mnd for Chivalry
+    sets.precast.JA['Chivalry'] = {main="Burtgang",
+    ammo="Paeapua",
+    head="Hero's Galea",
+    body={ name="Souveran Cuirass", augments={'HP+80','Enmity+7','Potency of "Cure" effect received +10%',}},
+    hands={ name="Yorium Gauntlets", augments={'Enmity+4',}},
+    legs={ name="Souveran Diechlings", augments={'HP+80','Enmity+7','Potency of "Cure" effect received +10%',}},
+    feet={ name="Eschite Greaves", augments={'HP+75','Enmity+6','Phys. dmg. taken -3',}},
+    neck="Unmoving Collar +1",
+    waist="Creed Baudrier",
+    right_ear="Friomisi Earring",
+    left_ring="Apeile Ring +1",
+    right_ring="Apeile Ring",
+    back="Earthcry Mantle"}
+    
+
+    -- Waltz set (chr and vit)
+    sets.precast.Waltz = {main="burtgang",ammo="Staunch Tathlum",
+        head="Souveran Schaller",neck="Twilight Torque",ear1="Ethereal Earring",ear2="Thureous Earring",
+        body="Souveran cuirass",hands="Souveran Handschuhs",ring1="Defending Ring",ring2="Moonbeam ring",
+        back="Philidor Mantle",waist="Flume Belt +1",legs="Souveran Diechlings",feet="Souveran schuhs"}
+        
+    -- Don't need any special gear for Healing Waltz.
+    sets.precast.Waltz['Healing Waltz'] = {}
+    
+    sets.precast.Step = {waist="Chaac Belt"}
+    sets.precast.Flourish1 = {waist="Chaac Belt"}
+
+    -- Fast cast sets for spells
+    
+    sets.precast.FC = {ammo="Incantor stone",
+    head={ name="Carmine Mask", augments={'Accuracy+15','Mag. Acc.+10','"Fast Cast"+3',}},
+    body="Odyss. Chestplate",
+    hands={ name="Leyline Gloves", augments={'Accuracy+12','Mag. Acc.+14','"Mag.Atk.Bns."+15','"Fast Cast"+2',}},
+    legs="Enif Cosciales",
+    feet={ name="Odyssean Greaves", augments={'Accuracy+19 Attack+19','Enmity+5','DEX+7','Accuracy+15','Attack+14',}},
+    neck="Orunmila's Torque",
+    right_ear="Loquac. Earring",
+    right_ring="Prolix Ring",
+	left_ring="Kishar ring"}
+
+    sets.precast.FC['Enhancing Magic'] = set_combine(sets.precast.FC, {waist="Siegel Sash"})
+
+       
+    -- Weaponskill sets
+    -- Default set for any weaponskill that isn't any more specifically defined
+    sets.precast.WS = {ammo="Paeapua",
+			head="Sulevia's Mask +1",body="Phorcys Korazin",hands={ name="Odyssean Gauntlets", augments={'Pet: Attack+17 Pet: Rng.Atk.+17','Magic dmg. taken -1%','Weapon skill damage +5%',}},
+			legs={ name="Valor. Hose", augments={'Weapon skill damage +3%','Crit.hit rate+1','Accuracy+4 Attack+4','Mag. Acc.+13 "Mag.Atk.Bns."+13',}},
+			feet="Sulev. Leggings +1",neck="Fotia Gorget",waist="Fotia Belt",left_ear="Ishvara Earring",right_ear="Moonshade Earring",
+			left_ring="K'ayres Ring",right_ring="Hetairoi Ring",back={ name="Rudianos's Mantle", augments={'MND+20','Accuracy+20 Attack+20','MND+10','Weapon skill damage +10%',}},}
+
+    sets.precast.WS.Acc = {ammo="Paeapua",head="Sulevia's Mask +1",body="Sulevia's Plate. +1",hands="Sulev. Gauntlets +1",
+			legs="Sulevi. Cuisses +1",feet="Sulev. Leggings +1",neck="Fotia Gorget",waist="Fotia Belt",
+			left_ear="Ishvara Earring",right_ear="Moonshade Earring",left_ring="K'ayres Ring",right_ring="Hetairoi Ring",
+			back={ name="Rudianos's Mantle", augments={'MND+20','Accuracy+20 Attack+20','MND+10','Weapon skill damage +10%',}}}
+
+    -- Specific weaponskill sets.  Uses the base set if an appropriate WSMod version isn't found.
+    sets.precast.WS['Requiescat'] = set_combine(sets.precast.WS, {ring1="Acumen Ring",ring2="Fenrir Ring"})
+    sets.precast.WS['Requiescat'].Acc = set_combine(sets.precast.WS.Acc, {ring1="Rajas Ring"})
+
+    sets.precast.WS['Chant du Cygne'] = {ammo="Paeapua",
+			head="Flam. Zucchetto +1",
+			body="Uac Jerkin",
+			hands={ name="Odyssean Gauntlets", augments={'Pet: Attack+17 Pet: Rng.Atk.+17','Magic dmg. taken -1%','Weapon skill damage +5%',}},
+			legs={ name="Odyssean Cuisses", augments={'Rng.Acc.+23 Rng.Atk.+23','CHR+8','Weapon skill damage +4%','Accuracy+7 Attack+7','Mag. Acc.+14 "Mag.Atk.Bns."+14',}},
+			feet="Thereoid Greaves",
+			neck="Fotia Gorget",
+			waist="Fotia Belt",
+			left_ear="Ishvara Earring",
+			right_ear={ name="Moonshade Earring", augments={'Accuracy+4','TP Bonus +25',}},
+			left_ring="regal Ring",
+			right_ring="Ramuh Ring",
+			back={ name="Rudianos's Mantle", augments={'DEX+20','Accuracy+20 Attack+20','Accuracy+10','"Dbl.Atk."+10',}}}
+	
+	sets.precast.WS['Savage Blade'] = {ammo="Paeapua",
+			head="Flam. Zucchetto +1",
+			body="Phorcys Korazin",
+			hands={ name="Odyssean Gauntlets", augments={'Pet: Attack+17 Pet: Rng.Atk.+17','Magic dmg. taken -1%','Weapon skill damage +5%',}},
+			legs={ name="Odyssean Cuisses", augments={'Rng.Acc.+23 Rng.Atk.+23','CHR+8','Weapon skill damage +4%','Accuracy+7 Attack+7','Mag. Acc.+14 "Mag.Atk.Bns."+14',}},
+			feet="Sulev. Leggings +1",
+			neck="Fotia Gorget",
+			waist="Fotia Belt",
+			left_ear="Ishvara Earring",
+			right_ear={ name="Moonshade Earring", augments={'Accuracy+4','TP Bonus +25',}},
+			left_ring="Hetairoi Ring",
+			right_ring="Apate Ring",
+			back={ name="Rudianos's Mantle", augments={'MND+20','Accuracy+20 Attack+20','MND+10','Weapon skill damage +10%',}}}
+	
+    sets.precast.WS['Chant du Cygne'].Acc = {ammo="Paeapua",
+        head="Gavialis Helm",neck="Fotia Gorget",ear1="Zennaroi Earring",ear2="Steelflash Earring",
+        body="Acro Surcoat",hands="Flamma Manopolas +1",ring1="Ramuh Ring",ring2="Ramuh Ring",
+        back={ name="Rudianos's Mantle", augments={'MND+20','Accuracy+20 Attack+20','MND+10','Weapon skill damage +10%',}},
+		waist="Fotia belt",legs="Carmine Cuisses +1",feet={ name="Odyssean Greaves", augments={'Accuracy+19 Attack+19','Enmity+5','DEX+7','Accuracy+15','Attack+14',}}}
+
+    sets.precast.WS['Sanguine Blade'] = {    ammo="Paeapua",
+			head="Pixie Hairpin +1",
+			body={ name="Found. Breastplate", augments={'Accuracy+1','"Mag.Atk.Bns."+10',}},
+			hands={ name="Odyssean Gauntlets", augments={'Pet: Attack+17 Pet: Rng.Atk.+17','Magic dmg. taken -1%','Weapon skill damage +5%',}},
+			legs={ name="Odyssean Cuisses", augments={'Rng.Acc.+23 Rng.Atk.+23','CHR+8','Weapon skill damage +4%','Accuracy+7 Attack+7','Mag. Acc.+14 "Mag.Atk.Bns."+14',}},
+			feet="Sulev. Leggings +1",
+			neck="Fotia Gorget",
+			waist="Fotia Belt",
+			left_ear="Ishvara Earring",
+			right_ear="Friomisi Earring",
+			left_ring="Fenrir Ring",
+			right_ring="Acumen Ring",
+			back={ name="Rudianos's Mantle", augments={'MND+20','Accuracy+20 Attack+20','MND+10','Weapon skill damage +10%',}}}
+    
+	sets.precast.WS['Circle Blade'] = {
+		head="Otomi Helm",neck="Fotia Gorget",ear1="Brutal Earring",ear2="Moonshade Earring",
+        body="Uac Jerkin",hands={ name="Odyssean Gauntlets", augments={'Mag. Acc.+9 "Mag.Atk.Bns."+9','Accuracy+18','"Treasure Hunter"+1','Accuracy+13 Attack+13',}},ring1="Rajas Ring",ring2="K'ayres ring",
+        back="Rancorous Mantle",waist="Chaac Belt",legs={ name="Odyssean Cuisses", augments={'Accuracy+21 Attack+21','VIT+4','"Treasure Hunter"+1',}},feet={ name="Odyssean Greaves", augments={'Mag. Acc.+17 "Mag.Atk.Bns."+17','"Fast Cast"+1','"Treasure Hunter"+1',}}}
+    
+	sets.precast.WS['Atonement'] = {ammo="Paeapua",
+		head="Flam. Zucchetto +1",
+		body="Phorcys Korazin",
+		hands={ name="Odyssean Gauntlets", augments={'Pet: Attack+17 Pet: Rng.Atk.+17','Magic dmg. taken -1%','Weapon skill damage +5%',}},
+		legs={ name="Odyssean Cuisses", augments={'Rng.Acc.+23 Rng.Atk.+23','CHR+8','Weapon skill damage +4%','Accuracy+7 Attack+7','Mag. Acc.+14 "Mag.Atk.Bns."+14',}},
+		feet="Sulev. Leggings +1",
+		neck="Fotia Gorget",
+		waist="Fotia Belt",
+		left_ear="Ishvara Earring",
+		right_ear={ name="Moonshade Earring", augments={'Accuracy+4','TP Bonus +25',}},
+		left_ring="Hetairoi Ring",
+		right_ring="Apate Ring",
+		back={ name="Rudianos's Mantle", augments={'MND+20','Accuracy+20 Attack+20','MND+10','Weapon skill damage +10%',}}}
+    
+    --------------------------------------
+    -- Midcast sets
+    --------------------------------------
+
+    sets.midcast.FastRecast = {
+        head="Carmine mask",
+        body="Reverence Surcoat +2",hands="Leyline Gloves",
+        waist="Zoran's Belt",legs="Enif Cosciales",feet="Odyssean Greaves"}   
+    
+	sets.midcast.Enmity = {main="Burtgang",
+    ammo="Paeapua",
+    head="Hero's Galea",
+    body={ name="Souveran Cuirass", augments={'HP+80','Enmity+7','Potency of "Cure" effect received +10%',}},
+    hands={ name="Yorium Gauntlets", augments={'Enmity+4',}},
+    legs={ name="Souveran Diechlings", augments={'HP+80','Enmity+7','Potency of "Cure" effect received +10%',}},
+    feet={ name="Eschite Greaves", augments={'HP+75','Enmity+6','Phys. dmg. taken -3',}},
+    neck="Unmoving Collar +1",
+    waist="Creed Baudrier",
+    right_ear="Friomisi Earring",
+    left_ring="Apeile Ring +1",
+    right_ring="Apeile Ring",
+    back="Earthcry Mantle"}
+		
+	sets.midcast.Provoke = {main="Burtgang",
+    ammo="Paeapua",
+    head="Hero's Galea",
+    body={ name="Souveran Cuirass", augments={'HP+80','Enmity+7','Potency of "Cure" effect received +10%',}},
+    hands={ name="Yorium Gauntlets", augments={'Enmity+4',}},
+    legs={ name="Souveran Diechlings", augments={'HP+80','Enmity+7','Potency of "Cure" effect received +10%',}},
+    feet={ name="Eschite Greaves", augments={'HP+75','Enmity+6','Phys. dmg. taken -3',}},
+    neck="Unmoving Collar +1",
+    waist="Creed Baudrier",
+    right_ear="Friomisi Earring",
+    left_ring="Apeile Ring +1",
+    right_ring="Apeile Ring",
+    back="Earthcry Mantle"}
+		
+    sets.midcast.Phalanx = {ammo="Paeapua",
+        head="Yorium Barbuta",neck="Unmoving Collar +1",ear1="Friomisi Earring",
+        body="Yorium Cuirass",hands="Souveran Handschuhs",ring1="Apeile Ring",ring2="Apeile Ring +1",
+        back="Weard Mantle",waist="Siegel sash",legs="Souveran Diechlings",feet="Souveran schuhs"}
+
+    sets.midcast.Flash = {main="Burtgang",
+    ammo="Paeapua",
+    head="Hero's Galea",
+    body={ name="Souveran Cuirass", augments={'HP+80','Enmity+7','Potency of "Cure" effect received +10%',}},
+    hands={ name="Yorium Gauntlets", augments={'Enmity+4',}},
+    legs={ name="Souveran Diechlings", augments={'HP+80','Enmity+7','Potency of "Cure" effect received +10%',}},
+    feet={ name="Eschite Greaves", augments={'HP+75','Enmity+6','Phys. dmg. taken -3',}},
+    neck="Unmoving Collar +1",
+    waist="Creed Baudrier",
+    right_ear="Friomisi Earring",
+    left_ring="Apeile Ring +1",
+    right_ring="Apeile Ring",
+    back="Earthcry Mantle"}
+    
+    sets.midcast.Stun = sets.midcast.Flash
+    
+    sets.midcast.Cure = {ammo="Impatiens",
+		head={ name="Souveran Schaller", augments={'HP+80','Enmity+7','Potency of "Cure" effect received +10%',}},
+		body={ name="Souveran Cuirass", augments={'HP+80','Enmity+7','Potency of "Cure" effect received +10%',}},
+		hands={ name="Buremte Gloves", augments={'Haste+2','"Snapshot"+2','STR+8',}},
+		legs={ name="Souveran Diechlings", augments={'HP+80','Enmity+7','Potency of "Cure" effect received +10%',}},
+		feet={ name="Odyssean Greaves", augments={'Mag. Acc.+17 "Mag.Atk.Bns."+17','"Fast Cast"+1','"Treasure Hunter"+1',}},
+		waist="Chuq'aba Belt",
+		left_ear="Nourish. Earring",
+		right_ear="Mendi. Earring",
+		right_ring="Kunaji Ring",
+		back="Solemnity Cape"}
+
+    sets.midcast['Enhancing Magic'] = {waist="Siegel Sash",legs="Reverence Breeches +2"}
+    
+    sets.midcast.Protect = {ring1="Sheltered Ring"}
+    sets.midcast.Shell = {ring1="Sheltered Ring"}
+    
+    --------------------------------------
+    -- Idle/resting/defense/etc sets
+    --------------------------------------
+
+    sets.Reraise = {head="Twilight Helm", body="Twilight Mail"}
+    
+    sets.resting = {neck="Creed Collar",
+       ring2="Paguroidea Ring",
+        }
+    
+
+    -- Idle sets
+    sets.idle = {   ammo="Homiliary",
+					head={ name="Valorous Mask", augments={'Attack+7','Damage taken-4%','AGI+10','Accuracy+8',}},
+					body={ name="Jumalik Mail", augments={'HP+50','Attack+15','Enmity+9','"Refresh"+2',}},
+					hands={ name="Souv. Handschuhs", augments={'HP+50','Shield skill +10','Phys. dmg. taken -3',}},
+					legs={ name="Valor. Hose", augments={'INT+3','Mag. Acc.+12','"Refresh"+1','Accuracy+18 Attack+18',}},
+					feet={ name="Amm Greaves", augments={'HP+50','VIT+10','Accuracy+15','Damage taken-2%',}},
+					neck="Twilight Torque",
+					waist="Flume Belt +1",
+					left_ear="Ethereal Earring",
+					right_ear="Brutal Earring",
+					left_ring="Defending Ring",
+					right_ring="Moonbeam ring",
+					back="Philidor Mantle"}
+
+    sets.idle.Town = {ammo="Homiliary",
+        head="Souveran Schaller",neck="Twilight Torque",ear1="Ethereal Earring",ear2="Brutal Earring",
+        body="Jumalik mail",hands="Souveran Handschuhs",ring1="Defending Ring",ring2="Moonbeam ring",
+        back="Philidor Mantle",waist="Flume Belt +1",legs={ name="Valor. Hose", augments={'INT+3','Mag. Acc.+12','"Refresh"+1','Accuracy+18 Attack+18',}},feet="Souveran schuhs"}
+    
+    sets.idle.Weak = {ammo="Homiliary",
+        head="Twilight helm",neck="Twilight Torque",ear1="Ethereal Earring",ear2="Brutal Earring",
+        body="Twilight mail",hands="Souveran Handschuhs",ring1="Defending Ring",ring2="Moonbeam ring",
+        back="Philidor Mantle",waist="Flume Belt +1",legs={ name="Valor. Hose", augments={'INT+3','Mag. Acc.+12','"Refresh"+1','Accuracy+18 Attack+18',}},feet="Hippomenes socks"}
+    
+    sets.idle.Weak.Reraise = set_combine(sets.idle.Weak, sets.Reraise)
+    
+    sets.Kiting = {legs="Carmine Cuisses +1"}
+
+    sets.latent_refresh = {waist="Fucho-no-obi"}
+	
+	sets.Adoulin = {
+        body="Councilor's Garb",
+    }
+	
+	sets.MoveSpeed = {
+		legs = "Carmine Cuisses +1",
+	}
+
+    --------------------------------------
+    -- Defense sets
+    --------------------------------------
+    
+    -- Extra defense sets.  Apply these on top of melee or defense sets.
+    sets.Knockback = {back="Philidor Mantle"}
+    sets.MP = {neck="Creed Collar",waist="Flume Belt +1"}
+    sets.MP_Knockback = {neck="Creed Collar",waist="Flume Belt +1",back="Philidor Mantle"}
+    
+    -- If EquipShield toggle is on (Win+F10 or Win+F11), equip the weapon/shield combos here
+    -- when activating or changing defense mode:
+    sets.PhysicalShield = {main="Burtgang",sub="Ochain"} -- Ochain
+    sets.MagicalShield = {main="Burtgang",sub="Aegis"} -- Aegis
+
+    -- Basic defense sets.
+        
+    sets.defense.PDT = {main="burtgang",ammo="Staunch Tathlum",
+        head="Souveran Schaller",neck="Twilight Torque",ear1="Ethereal Earring",ear2="Thureous Earring",
+        body="Souveran cuirass",hands="Souveran Handschuhs",ring1="Defending Ring",ring2="Dark ring",
+        back="Philidor Mantle",waist="Flume Belt +1",legs="Chevalier's Cuisses",feet="Souveran schuhs"}
+    sets.defense.HP = {main="burtgang",ammo="Staunch Tathlum",
+        head="Souveran Schaller",neck="Twilight Torque",ear1="Ethereal Earring",ear2="Thureous Earring",
+        body="Reverence Surcoat +2",hands="Souveran Handschuhs",ring1="Defending Ring",ring2="Moonbeam ring",
+        back="Moonbeam cape",waist="Flume Belt +1",legs="Reverence Breeches +2",feet="Souveran schuhs"}
+	sets.defense.Block = {ammo="Staunch Tathlum",
+							head="Sulevia's Mask +1",
+							body={ name="Odyss. Chestplate", augments={'Mag. Acc.+13','CHR+4','Chance of successful block +4','Accuracy+11 Attack+11',}},
+							hands={ name="Odyssean Gauntlets", augments={'DEX+2','Weapon skill damage +2%','Chance of successful block +5','Accuracy+6 Attack+6',}},
+							legs={ name="Souveran Diechlings", augments={'HP+80','Enmity+7','Potency of "Cure" effect received +10%',}},
+							feet={ name="Odyssean Greaves", augments={'Accuracy+10','STR+5','Chance of successful block +4','Accuracy+8 Attack+8','Mag. Acc.+15 "Mag.Atk.Bns."+15',}},
+							neck="Twilight Torque",
+							waist="Flume Belt +1",
+							left_ear="Ethereal Earring",
+							right_ear="Thureous Earring",
+							left_ring="Defending Ring",
+							right_ring="Moonbeam ring",
+							back={ name="Rudianos's Mantle", augments={'DEX+20','Accuracy+20 Attack+20','Accuracy+10','"Dbl.Atk."+10',}}}
+	sets.defense.ACC = {main="burtgang",ammo="Paeapua",
+		head="Sulevia's Mask +1",neck="Twilight Torque",left_ear="Steelflash Earring",right_ear="Bladeborn Earring",
+		body="Sulevia's Plate. +1",hands="Sulev. Gauntlets +1",left_ring="Defending Ring",right_ring="Hetairoi Ring",
+		back={ name="Rudianos's Mantle", augments={'DEX+20','Accuracy+20 Attack+20','Accuracy+10','"Dbl.Atk."+10',}},waist="Olseni Belt",
+		legs="Sulevi. Cuisses +1",feet="Sulev. Leggings +1",}
+    sets.defense.Reraise = {main="burtgang",ammo="Vanir Battery",
+        head="Twilight Helm",neck="Twilight Torque",ear1="Ethereal Earring",ear2="Brutal Earring",
+        body="Twilight mail",hands="Souveran Handschuhs",ring1="Defending Ring",ring2="Moonbeam ring",
+        back="Philidor Mantle",waist="Flume Belt +1",legs="Souveran Diechlings",feet="Souveran schuhs"}
+    sets.defense.Charm = {main="burtgang",ammo="Staunch Tathlum",
+        head="Souveran Schaller",neck="Unmoving Collar +1",ear1="Ethereal Earring",ear2="Thureous Earring",
+        body="Souveran cuirass",hands="Souveran Handschuhs",ring1="Defending Ring",ring2="Moonbeam ring",
+        back="Solemnity Cape",waist="Flume Belt +1",legs="Souveran Diechlings",feet="Souveran schuhs"}
+    -- To cap MDT with Shell IV (52/256), need 76/256 in gear.
+    -- Shellra V can provide 75/256, which would need another 53/256 in gear.
+    sets.defense.MDT = {main="burtgang",ammo="Vanir Battery",
+        head="Souveran Schaller",neck="Twilight Torque",ear1="ethereal Earring",ear2="zennaroi Earring",
+        body="Reverence Surcoat +2",hands="Souveran Handschuhs",ring1="Defending Ring",ring2="Moonbeam ring",
+        back="Philidor Mantle",waist="Creed Baudrier",legs="Souveran Diechlings",feet="Souveran schuhs"}
+
+
+    --------------------------------------
+    -- Engaged sets
+    --------------------------------------
+    
+    sets.engaged = {ammo="Paeapua",
+		head="Sulevia's Mask +1",neck="Twilight Torque",left_ear="Steelflash Earring",right_ear="Bladeborn Earring",
+		body="Sulevia's Plate. +1",hands="Sulev. Gauntlets +1",left_ring="Defending Ring",right_ring="Hetairoi Ring",
+		back={ name="Rudianos's Mantle", augments={'DEX+20','Accuracy+20 Attack+20','Accuracy+10','"Dbl.Atk."+10',}},waist="Olseni Belt",
+		legs="Sulevi. Cuisses +1",feet="Sulev. Leggings +1",}
+
+    sets.engaged.Acc = {ammo="Paeapua",
+    head="Flam. Zucchetto +1",
+    body="Sulevia's Plate. +1",
+    hands="Sulev. Gauntlets +1",
+    legs="Sulevi. Cuisses +1",
+    feet="Flam. Gambieras +1",
+    neck="Asperity Necklace",
+    waist="Windbuffet Belt +1",
+    left_ear="Steelflash Earring",
+    right_ear="Bladeborn Earring",
+    left_ring="Defending Ring",
+    right_ring="Moonbeam ring",
+    back={ name="Rudianos's Mantle", augments={'DEX+20','Accuracy+20 Attack+20','Accuracy+10','"Dbl.Atk."+10',}}}
+
+    sets.engaged.DW = {ammo="Paeapua",
+		head="Sulevia's Mask +1",neck="Asperity Necklace",left_ear="Eabani Earring",right_ear="suppanomimi",
+		body="Sulevia's Plate. +1",hands="Sulev. Gauntlets +1",left_ring="Defending Ring",right_ring="Hetairoi Ring",
+		back={ name="Rudianos's Mantle", augments={'DEX+20','Accuracy+20 Attack+20','Accuracy+10','"Dbl.Atk."+10',}},waist="Windbuffet belt +1",
+		legs="Carmine Cuisses +1",feet="Sulev. Leggings +1",}
+
+    sets.engaged.DW.Acc = {    ammo="Paeapua",
+    head="Flam. Zucchetto +1",
+    body="Sulevia's Plate. +1",
+    hands="Sulev. Gauntlets +1",
+    legs="Sulevi. Cuisses +1",
+    feet="Flam. Gambieras +1",
+    neck="Asperity Necklace",
+    waist="Windbuffet Belt +1",
+    left_ear="Steelflash Earring",
+    right_ear="Bladeborn Earring",
+    left_ring="Defending Ring",
+    right_ring="Moonbeam ring",
+    back={ name="Rudianos's Mantle", augments={'DEX+20','Accuracy+20 Attack+20','Accuracy+10','"Dbl.Atk."+10',}}}
+
+    sets.engaged.PDT = set_combine(sets.engaged, {body="Souveran cuirass",neck="Twilight Torque",ring1="Defending Ring"})
+    sets.engaged.Acc.PDT = set_combine(sets.engaged.Acc, {body="Souveran cuirass",neck="Twilight Torque",ring1="Defending Ring"})
+    sets.engaged.Reraise = set_combine(sets.engaged, sets.Reraise)
+    sets.engaged.Acc.Reraise = set_combine(sets.engaged.Acc, sets.Reraise)
+
+    sets.engaged.DW.PDT = set_combine(sets.engaged.DW, {body="Souveran cuirass",neck="Twilight Torque",ring1="Defending Ring"})
+    sets.engaged.DW.Acc.PDT = set_combine(sets.engaged.DW.Acc, {body="Souveran cuirass",neck="Twilight Torque",ring1="Defending Ring"})
+    sets.engaged.DW.Reraise = set_combine(sets.engaged.DW, sets.Reraise)
+    sets.engaged.DW.Acc.Reraise = set_combine(sets.engaged.DW.Acc, sets.Reraise)
+
+
+    --------------------------------------
+    -- Custom buff sets
+    --------------------------------------
+
+    sets.buff.Doom = {head="Twilight helm",body="Twilight mail"}
+    sets.buff.Cover = {head="Reverence Coronet +2", body="Caballarius Surcoat"}
+end
+
+
+-------------------------------------------------------------------------------------------------------------------
+-- Job-specific hooks for standard casting events.
+-------------------------------------------------------------------------------------------------------------------
+function job_precast(spell, action, spellMap, eventArgs)
+if spell.english == 'Jettatura' or spell.english == 'Geist Wall' or spell.english == 'Cocoon' or spell.english == 'Soporific' or spell.english == 'Blank Gaze' or spell.english == 'Sheep Song' or spell.english == 'Chaotic Eye' or spell.english == 'Cursed Sphere' then
+	precastSet = sets.precast.FC
+end
+
+
+if ((spell.english == 'Cure' and player.hp > 2200) and
+	(state.PhysicalDefenseMode.Value == 'HP' or state.MagicalDefenseMode.Value == 'HP')) then
+	precastSet = sets.defense.HP
+	
+	else return sets.precast.FC
+end
+end
+
+
+function job_midcast(spell, action, spellMap, eventArgs)
+	if spell.english == 'Jettatura' or spell.english == 'Geist Wall' or spell.english == 'Soporific' or spell.english == 'Blank Gaze' or spell.english == 'Sheep Song' or spell.english == 'Chaotic Eye' or spell.english == 'Cursed Sphere' then
+	equip(sets.midcast.Flash)
+	end
+	
+ 
+    
+-- 	WARNING IF YOU ENABLE ARGUMENT THAT IS COMMENTED OUT, YOU WILL NOT CHANGE GEAR IN MIDCAST, PERIOD 
+--   THIS MUST BE DISABLED FOR SETS TO SWAP GEAR FOR BOTH SPELLS AND ABLITIES!!!!
+	
+    -- If DefenseMode is active, apply that gear over midcast
+    -- choices.  Precast is allowed through for fast cast on
+    -- spells, but we want to return to def gear before there's
+    -- time for anything to hit us.
+    -- Exclude Job Abilities from this restriction, as we probably want
+    -- the enhanced effect of whatever item of gear applies to them,
+    -- and only one item should be swapped out.
+  --[[  if state.DefenseMode.value ~= 'None' and spell.type ~= 'JobAbility' then
+        handle_equipping_gear(player.status)
+        eventArgs.handled = false
+    end]]
+end
+
+function job_post_midcast(spell, action, spellMap, eventArgs)
+	if spell.english == 'Cure IV' and
+	(state.PhysicalDefenseMode.Value == 'HP' or state.MagicalDefenseMode.Value == 'HP') then
+	equip(sets.defense.HP)
+	end
+end
+--function job_aftercast(spell, action, spellMap, eventArgs)
+--	if buffactive['poison'] then
+--	send_command('input /item "antidote" <me>')
+	--end 
+--	end
+	--if not buffactive["Aftermath: Lv.3"] then 
+    --    send_command('gs equip sets.defense.ACC' ) 
+--		add_to_chat(122,'Aftermath: 3 Inactive Build 3000TP!')	
+--	end
+--end
+
+-------------------------------------------------------------------------------------------------------------------
+-- Job-specific hooks for non-casting events.
+-------------------------------------------------------------------------------------------------------------------
+
+-- Called when the player's status changes.
+function job_state_change(field, new_value, old_value)
+    classes.CustomDefenseGroups:clear()
+    classes.CustomDefenseGroups:append(state.ExtraDefenseMode.current)
+    if state.EquipShield.value == true then
+        classes.CustomDefenseGroups:append(state.DefenseMode.current .. 'Shield')
+    end
+
+    classes.CustomMeleeGroups:clear()
+    classes.CustomMeleeGroups:append(state.ExtraDefenseMode.current)
+end
+
+-------------------------------------------------------------------------------------------------------------------
+-- User code that supplements standard library decisions.
+-------------------------------------------------------------------------------------------------------------------
+
+-- Called by the 'update' self-command, for common needs.
+-- Set eventArgs.handled to true if we don't want automatic equipping of gear.
+function job_update(cmdParams, eventArgs)
+    update_defense_mode()
+
+end
+
+-- Modify the default idle set after it was constructed.
+function customize_idle_set(idleSet)
+    if player.mpp < 51 then
+        idleSet = set_combine(idleSet, sets.latent_refresh)
+    end
+    if state.Buff.Doom then
+        idleSet = set_combine(idleSet, sets.buff.Doom)
+    end
+    
+    return idleSet
+end
+
+-- Modify the default melee set after it was constructed.
+
+
+
+function customize_defense_set(defenseSet)
+    if state.ExtraDefenseMode.value ~= 'None' then
+        defenseSet = set_combine(defenseSet, sets[state.ExtraDefenseMode.value])
+    end
+    
+    if state.EquipShield.value == true then
+        defenseSet = set_combine(defenseSet, sets[state.DefenseMode.current .. 'Shield'])
+    end
+    
+    if state.Buff.Doom then
+        defenseSet = set_combine(defenseSet, sets.buff.Doom)
+    end
+    
+    return defenseSet
+end
+
+
+function display_current_job_state(eventArgs)
+    local msg = 'Melee'
+    
+    if state.CombatForm.has_value then
+        msg = msg .. ' (' .. state.CombatForm.value .. ')'
+    end
+    
+    msg = msg .. ': '
+    
+    msg = msg .. state.OffenseMode.value
+    if state.HybridMode.value ~= 'Normal' then
+        msg = msg .. '/' .. state.HybridMode.value
+    end
+    msg = msg .. ', WS: ' .. state.WeaponskillMode.value
+    
+    if state.DefenseMode.value ~= 'None' then
+        msg = msg .. ', Defense: ' .. state.DefenseMode.value .. ' (' .. state[state.DefenseMode.value .. 'DefenseMode'].value .. ')'
+    end
+
+    if state.ExtraDefenseMode.value ~= 'None' then
+        msg = msg .. ', Extra: ' .. state.ExtraDefenseMode.value
+    end
+    
+    if state.EquipShield.value == true then
+        msg = msg .. ', Force Equip Shield'
+    end
+    
+    if state.Kiting.value == true then
+        msg = msg .. ', Kiting'
+    end
+
+    if state.PCTargetMode.value ~= 'default' then
+        msg = msg .. ', Target PC: '..state.PCTargetMode.value
+    end
+
+    if state.SelectNPCTargets.value == true then
+        msg = msg .. ', Target NPCs'
+    end
+
+    add_to_chat(122, msg)
+
+    eventArgs.handled = true
+end
+
+-------------------------------------------------------------------------------------------------------------------
+-- Utility functions specific to this job.
+-------------------------------------------------------------------------------------------------------------------
+
+mov = {counter=0}
+if player and player.index and windower.ffxi.get_mob_by_index(player.index) then
+    mov.x = windower.ffxi.get_mob_by_index(player.index).x
+    mov.y = windower.ffxi.get_mob_by_index(player.index).y
+    mov.z = windower.ffxi.get_mob_by_index(player.index).z
+end
+
+moving = false
+windower.raw_register_event('prerender',function()
+    mov.counter = mov.counter + 1;
+    if mov.counter>15 then
+        local pl = windower.ffxi.get_mob_by_index(player.index)
+        if pl and pl.x and mov.x then
+            dist = math.sqrt( (pl.x-mov.x)^2 + (pl.y-mov.y)^2 + (pl.z-mov.z)^2 )
+            if dist > 1 and not moving then
+                state.Moving.value = true
+				send_command('gs c update')
+                send_command('gs equip sets.MoveSpeed')
+			    if world.area:contains("Adoulin") then
+					send_command('gs equip sets.Adoulin')
+				end
+                moving = true
+				
+            elseif dist < 1 and moving then
+                state.Moving.value = false
+                send_command('gs c update')
+                moving = false
+            end
+        end
+        if pl and pl.x then
+            mov.x = pl.x
+            mov.y = pl.y
+            mov.z = pl.z
+        end
+        mov.counter = 0
+    end
+end)
+
+function update_defense_mode()
+    if player.equipment.main == 'Kheshig Blade' and not classes.CustomDefenseGroups:contains('Kheshig Blade') then
+        classes.CustomDefenseGroups:append('Kheshig Blade')
+    end
+    
+  if player.sub_job == 'NIN' or player.sub_job == 'DNC' then
+        if player.equipment.sub and not player.equipment.sub:contains('Shield') and
+          player.equipment.sub ~= 'Aegis' and player.equipment.sub ~= 'Ochain' then
+           state.CombatForm:set('DW')
+      else
+          state.CombatForm:reset()
+        end
+   end
+end
+
+
+-- Select default macro book on initial load or subjob change.
+function select_default_macro_book()
+    -- Default macro set/book
+    if player.sub_job == 'DNC' then
+        set_macro_page(1, 20)
+    elseif player.sub_job == 'NIN' then
+        set_macro_page(1, 20)
+    elseif player.sub_job == 'RDM' then
+        set_macro_page(1, 20)
+    else
+        set_macro_page(1, 20)
+    end
+end
