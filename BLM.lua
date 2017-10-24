@@ -14,7 +14,7 @@
 --   
 --                                                                             --
 ---------------------------------------------------------------------------------
-	
+
 	
 -- This file should be treated as a work in progress, check back to The Black Sacrament Guide or Github for updates
 
@@ -48,7 +48,7 @@ end
 
 function job_setup()
     state.OffenseMode:options('None', 'Locked')
-    state.CastingMode:options('Normal', 'Occult_Acumen', 'Free_Nuke')
+    state.CastingMode:options('Normal', 'OccultAcumen', 'FreeNuke')
     state.IdleMode:options('Normal', 'PDT')
 	state.VorsealMode = M('Normal', 'Vorseal')
 	state.ManawallMode = M('Swaps', 'No_Swaps')
@@ -361,7 +361,7 @@ function init_gear_sets()
 		right_ring="Shiva Ring +1",
 		back={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10',}},}
 
-    sets.midcast['Elemental Magic'].Free_Nuke = set_combine(sets.midcast['Elemental Magic'], {
+    sets.midcast['Elemental Magic'].FreeNuke = set_combine(sets.midcast['Elemental Magic'], {
 		main="Grioavolr",
 		sub="Niobid Strap",
 		ammo="Pemphredo Tathlum",
@@ -378,16 +378,18 @@ function init_gear_sets()
 		right_ring="Shiva Ring +1",
 		back={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10',}}})
 		
-    sets.midcast['Elemental Magic'].Occult_Acumen = set_combine(sets.midcast['Elemental Magic'], set.AF_Body, {
+    sets.midcast['Elemental Magic'].OccultAcumen = set_combine(sets.midcast['Elemental Magic'].HighTierNuke, {
 		ammo="Seraphic Ampulla",
+		body="Spaekona's Coat +2", 
+		right_ear="Regal Earring",
 		head={ name="Merlinic Hood", augments={'Mag. Acc.+24','"Occult Acumen"+10','INT+9',}},
 		hands={ name="Merlinic Dastanas", augments={'Mag. Acc.+20','"Occult Acumen"+11',}},
 		legs={ name="Merlinic Shalwar", augments={'Mag. Acc.+16 "Mag.Atk.Bns."+16','"Occult Acumen"+9','INT+10','"Mag.Atk.Bns."+8',}},
-		feet={ name="Merlinic Crackows", augments={'Mag. Acc.+23 "Mag.Atk.Bns."+23','Magic burst dmg.+8%','Mag. Acc.+11',}},})
+		feet={ name="Merlinic Crackows", augments={'Mag. Acc.+23 "Mag.Atk.Bns."+23','Magic burst dmg.+8%','Mag. Acc.+11',}}})
 		
     sets.midcast['Elemental Magic'].HighTierNuke = set_combine(sets.midcast['Elemental Magic'], {})
 	
-    sets.midcast['Elemental Magic'].HighTierNuke.Free_Nuke = set_combine(sets.midcast['Elemental Magic'].HighTierNuke, {
+    sets.midcast['Elemental Magic'].HighTierNuke.FreeNuke = set_combine(sets.midcast['Elemental Magic'].HighTierNuke, {
 		main="Grioavolr",
 		sub="Niobid Strap",
 		ammo="Pemphredo Tathlum",
@@ -404,8 +406,10 @@ function init_gear_sets()
 		right_ring="Shiva Ring +1",
 		back={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10',}}})
 		
-    sets.midcast['Elemental Magic'].HighTierNuke.Occult_Acumen = set_combine(sets.midcast['Elemental Magic'].HighTierNuke, set.AF_Body, {
+    sets.midcast['Elemental Magic'].HighTierNuke.OccultAcumen = set_combine(sets.midcast['Elemental Magic'].HighTierNuke, {
 		ammo="Seraphic Ampulla",
+		body="Spaekona's Coat +2", 
+		right_ear="Regal Earring",
 		head={ name="Merlinic Hood", augments={'Mag. Acc.+24','"Occult Acumen"+10','INT+9',}},
 		hands={ name="Merlinic Dastanas", augments={'Mag. Acc.+20','"Occult Acumen"+11',}},
 		legs={ name="Merlinic Shalwar", augments={'Mag. Acc.+16 "Mag.Atk.Bns."+16','"Occult Acumen"+9','INT+10','"Mag.Atk.Bns."+8',}},
@@ -440,7 +444,7 @@ function init_gear_sets()
 		right_ring="Mujin Band",
 		back={ name="Taranus's Cape", augments={'INT+20','Mag. Acc+20 /Mag. Dmg.+20','INT+10','"Mag.Atk.Bns."+10',}}})
  
-	sets.midcast['Comet'].Free_Nuke = set_combine(sets.midcast['Elemental Magic'], {
+	sets.midcast['Comet'].FreeNuke = set_combine(sets.midcast['Elemental Magic'], {
 		sub="Niobid Strap",
 		ammo="Seraphic Ampulla",
 		head="Pixie Hairpin +1",
@@ -586,7 +590,7 @@ function init_gear_sets()
  
     -- Set for Conserve MP toggle, convert damage to MP body.
 	
-    sets.AF_Body = {body="Spaekona's Coat +2"}
+    sets.AFBody = {body="Spaekona's Coat +2", right_ear="Regal Earring"}
  
     --- PDT set is designed to be used for MP total set, MDT can be used for whatever you like but in MDT mode
 	--- the player.mp arguments will likely stop working properly
@@ -795,7 +799,7 @@ function job_post_midcast(spell, action, spellMap, eventArgs)
         end
     end
 	if spell.skill == 'Elemental Magic' and spell.english ~= 'Impact' and (player.mp-spell.mp_cost) < 436 then
-		equip(sets.AF_Body)
+		equip(sets.AFBody)
 	end
 		
 	if spell.skill == 'Enfeebling Magic' and state.Enfeebling.Value == 'Effect' then
@@ -803,7 +807,7 @@ function job_post_midcast(spell, action, spellMap, eventArgs)
 	end
 	
 	if spell.skill == 'Elemental Magic' and (string.find(spell.english,'ga') or string.find(spell.english,'ja') or string.find(spell.english,'ra')) then
-            equip(sets.AF_Body)
+            equip(sets.AFBody)
 	end
 	
 	if spellMap == 'Cure' and state.ManawallMode.Value == 'No_Swaps' then
