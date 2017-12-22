@@ -1,5 +1,5 @@
 include('organizer-lib')
---Author (Byrne Asura)
+
 
 -------------------------------------------------------------------------------------------------------------------
 -- Setup functions for this job.  Generally should not be modified.
@@ -168,7 +168,7 @@ function init_gear_sets()
 		right_ear="Regal Earring",
 		left_ring="Karieyh Ring",
 		right_ring="Rufescent Ring",
-		back={ name="Sucellos's Cape", augments={'STR+20','Accuracy+20 Attack+20','Weapon skill damage +10%',}},}
+		back={ name="Sucellos's Cape", augments={'STR+20','Accuracy+20 Attack+20','STR+10','Weapon skill damage +10%',}},}
 		
 	sets.precast.WS['Aeolian Edge']	= {
 		ammo="Pemphredo Tathlum",
@@ -220,16 +220,7 @@ function init_gear_sets()
 	
     -- Midcast Sets
     
-    sets.midcast.FastRecast = {
-        head="Carmine Mask +1",
-		ear2="Loquacious Earring",
-        body="Vitivation Tabard +1",
-		hands="Gendewitha Gages +1",
-		ring1="Prolix Ring",
-        back="Swith Cape +1",
-		waist="Siegel Sash",
-		legs="Hagondes Pants +1",
-		feet="Carmine Greaves +1"}
+    sets.midcast.FastRecast = {}
 
     sets.midcast.Cure = {
 		main="Tamaxchi",
@@ -261,9 +252,13 @@ function init_gear_sets()
 		feet="Gendewitha Galoshes"}
         
     sets.midcast.Curaga = sets.midcast.Cure
-    sets.midcast.CureSelf = set_combine(sets.midcast.Cure, {ring1="Dark Ring",ring2="Kunaji Ring",hands="Buremte gloves",waist="Gishdubar Sash"})
-	sets.midcast.Phalanx = set_combine(sets.midcast['Enhancing Magic'], {main="Egeking"})
 	
+    sets.midcast.CureSelf = set_combine(sets.midcast.Cure, {
+		ring1="Dark Ring",
+		ring2="Kunaji Ring",
+		hands="Buremte gloves",
+		waist="Gishdubar Sash"})
+		
     sets.midcast['Enhancing Magic'] = {
 		main="Arendsi Fleuret",
 		sub="Ammurapi Shield",
@@ -288,7 +283,7 @@ function init_gear_sets()
 		head={ name="Telchine Cap", augments={'Enh. Mag. eff. dur. +9',}},
 		body="Telchine Chas.",
 		hands="Atrophy Gloves +3",
-		legs="Atrophy Tights +3",
+		legs="Telchine Braconi",
 		feet="Leth. Houseaux +1",
 		neck="Incanter's Torque",
 		waist="Olympus Sash",
@@ -303,8 +298,8 @@ function init_gear_sets()
 		sub="Ammurapi Shield",
 		ammo="Regal Gem",
 		head="Befouled Crown",
-		body="Vitivation Tabard +1",
-		hands="Chironic Gloves",
+		body="Vitiation Tabard +1",
+		hands="Vitiation Gloves +3",
 		legs="Atrophy Tights +3",
 		feet="Leth. Houseaux +1",
 		neck="Incanter's Torque",
@@ -315,14 +310,27 @@ function init_gear_sets()
 		right_ring="Stikini Ring",
 		back="Ghostfyre Cape",}
 	
+	sets.midcast.Phalanx = set_combine(sets.midcast['Enhancing Magic'].Skill, {main="Egeking"})
+	
 	sets.midcast['Enhancing Magic'].Enspell = set_combine(sets.midcast['Enhancing magic'], {
-		head="Umuthi Hat",hands="Ayanmo Manopolas +1",back="Ghostfyre Cape"})
+		head="Umuthi Hat",
+		hands="Ayanmo Manopolas +1",
+		back="Ghostfyre Cape"})
 		
-    sets.midcast.Refresh = set_combine(sets.midcast['Enhancing Magic'], {body="Atrophy Tabard +3",head="Amalric Coif",
-		legs="Lethargy Fuseau +1",waist="Gishdubar sash"})
+	sets.midcast['Enhancing Magic'].GainSpell = set_combine(sets.midcast['Enhancing Magic'].SelfDuration, {hands="Vitiation gloves +3"})
+		
+    sets.midcast.Refresh = set_combine(sets.midcast['Enhancing Magic'], {
+		body="Atrophy Tabard +3",
+		head="Amalric Coif",
+		legs="Lethargy Fuseau +1",
+		waist="Gishdubar sash"})
 
     sets.midcast.Stoneskin = set_combine(sets.midcast['Enhancing Magic'], {
-		waist="Siegel Sash",neck="Nodens Gorget",hands="Stone Mufflers",legs="Haven hose",ear2="Earthcry Earring"})
+		waist="Siegel Sash",
+		neck="Nodens Gorget",
+		hands="Stone Mufflers",
+		legs="Haven hose",
+		ear2="Earthcry Earring"})
 	
     sets.midcast['Enfeebling Magic'] = {
 		main="Grioavolr",
@@ -529,32 +537,91 @@ function init_gear_sets()
 		right_ring="Rajas Ring",
 		back={ name="Sucellos's Cape", augments={'DEX+20','Accuracy+20 Attack+20','"Dbl.Atk."+10',}}}
     
-    sets.idle.Weak = {main="Emissary",sub="Beatific Shield +1",
-        head="Gendewitha Caubeen +1",neck="Loricate Torque +1",ear1="Merman's Earring",ear2="Merman's Earring",
-        body="Emet Harness +1",hands="Buremte Gloves",ring1="Dark Ring",ring2="Defending ring",
-        back="Solemnity Cape",waist="Flume Belt +1",legs="Ayanmo Cosciales +2",feet="Ayanmo Gambieras +1"}
+    sets.idle.Weak = {
+		main="Emissary",
+		sub="Beatific Shield +1",
+        head="Gendewitha Caubeen +1",
+		neck="Loricate Torque +1",
+		ear1="Merman's Earring",
+		ear2="Merman's Earring",
+        body="Emet Harness +1",
+		hands="Buremte Gloves",
+		ring1="Dark Ring",
+		ring2="Defending ring",
+        back="Solemnity Cape",
+		waist="Flume Belt +1",
+		legs="Ayanmo Cosciales +2",
+		feet="Ayanmo Gambieras +1"}
 
-    sets.idle.PDT = {main="Emissary",sub="Beatific Shield +1",ammo="staunch Tathlum",
-        head="Gendewitha Caubeen +1",neck="Loricate Torque +1",ear1="Merman's Earring",ear2="Merman's Earring",
-        body="Emet Harness +1",hands="Buremte Gloves",ring1="Dark Ring",ring2="Defending ring",
-        back="Solemnity Cape",waist="Flume Belt +1",legs="Ayanmo Cosciales +2",feet="Battlecast Gaiters"}
+    sets.idle.PDT = {
+		main="Terra's Staff",
+		sub="Irenic Strap",
+		ammo="Staunch Tathlum",
+		head="Aya. Zucchetto +1",
+		body="Ayanmo Corazza +2",
+		hands={ name="Buremte Gloves", augments={'Phys. dmg. taken -2%','Magic dmg. taken -2%','Phys. dmg. taken -2%',}},
+		legs="Aya. Cosciales +2",
+		feet="Aya. Gambieras +1",
+		neck="Loricate Torque +1",
+		waist="Flume Belt +1",
+		left_ear="Merman's Earring",
+		right_ear="Merman's Earring",
+		left_ring={ name="Dark Ring", augments={'Phys. dmg. taken -6%','Magic dmg. taken -4%',}},
+		right_ring="Defending Ring",
+		back="Solemnity Cape",}
 
-    sets.idle.MDT = {main="Terra's Staff",ammo="Demonry Stone",ammo="staunch Tathlum",
-        head="Gendewitha Caubeen +1",neck="Loricate Torque +1",ear1="Merman's Earring",ear2="Merman's Earring",
-        body="Ayanmo Corazza +2",hands="Ayanmo Manopolas +1",ring1="Defending Ring",ring2="Dark Ring",
-        back="Engulfer Cape",waist="Flume Belt +1",legs="Ayanmo Cosciales +2",feet="Ayanmo Gambieras +1"}
+    sets.idle.MDT = {
+		main="Terra's Staff",
+		sub="Irenic Strap",
+		ammo="Staunch Tathlum",
+		head="Aya. Zucchetto +1",
+		body="Ayanmo Corazza +2",
+		hands={ name="Buremte Gloves", augments={'Phys. dmg. taken -2%','Magic dmg. taken -2%','Phys. dmg. taken -2%',}},
+		legs="Aya. Cosciales +2",
+		feet="Aya. Gambieras +1",
+		neck="Loricate Torque +1",
+		waist="Flume Belt +1",
+		left_ear="Merman's Earring",
+		right_ear="Merman's Earring",
+		left_ring={ name="Dark Ring", augments={'Phys. dmg. taken -6%','Magic dmg. taken -4%',}},
+		right_ring="Defending Ring",
+		back="Solemnity Cape",}
     
     
     -- Defense sets
-    sets.defense.PDT = {main="Emissary",sub="Beatific Shield +1",ammo="staunch Tathlum",
-        head="Gendewitha Caubeen +1",neck="Loricate Torque +1",ear1="Merman's Earring",ear2="Merman's Earring",
-        body="Ayanmo Corazza +2",hands="Buremte Gloves",ring1="Dark Ring",ring2="Defending ring",
-        back="Solemnity Cape",waist="Flume Belt +1",legs="Ayanmo Cosciales +2",feet="Ayanmo Gambieras +1"}
+    sets.defense.PDT = {
+		main="Emissary",
+		sub="Beatific Shield +1",
+		ammo="staunch Tathlum",
+        head="Gendewitha Caubeen +1",
+		neck="Loricate Torque +1",
+		ear1="Merman's Earring",
+		ear2="Merman's Earring",
+        body="Ayanmo Corazza +2",
+		hands="Buremte Gloves",
+		ring1="Dark Ring",
+		ring2="Defending ring",
+        back="Solemnity Cape",
+		waist="Flume Belt +1",
+		legs="Ayanmo Cosciales +2",
+		feet="Ayanmo Gambieras +1"}
 
-    sets.defense.MDT = {main="Bolelabunga",sub="Genbu's Shield",ammo="staunch Tathlum",
-        head="Vitivation Chapeau +1",neck="Loricate Torque +1",ear1="Merman's Earring",ear2="Merman's Earring",
-        body="Ayanmo Corazza +2",hands="Ayanmo Manopolas +1",ring1="Paguroidea Ring",ring2="Sheltered Ring",
-        back="Engulfer Cape +1",waist="Flume Belt +1",legs="Ayanmo Cosciales +2",feet="Ayanmo Gambieras +1"}
+    sets.defense.MDT = {
+		main="Bolelabunga",
+		sub="Genbu's Shield",
+		ammo="staunch Tathlum",
+        head="Vitivation Chapeau +1",
+		neck="Loricate Torque +1",
+		ear1="Merman's Earring",
+		ear2="Merman's Earring",
+        body="Ayanmo Corazza +2",
+		hands="Ayanmo Manopolas +1",
+		ring1="Paguroidea Ring",
+		ring2="Sheltered Ring",
+        back="Engulfer Cape +1",
+		waist="Flume Belt +1",
+		legs="Ayanmo Cosciales +2",
+		feet="Ayanmo Gambieras +1"}
 		
 
     sets.latent_refresh = {waist="Fucho-no-obi"}
@@ -739,8 +806,11 @@ function job_post_midcast(spell, action, spellMap, eventArgs)
         equip(sets.midcast.CureSelf)
 	end
 	
-	if spell.skill == "Enhancing Magic" and ((spell.english:startswith('Haste') or spell.english:startswith("Flurry") or 
-		spell.english:startswith('Gain') or spell.english == 'Aquaveil' or spell.english:startswith('Protect') 
+	if spell.skill == "Enhancing Magic" and 
+		spell.english:startswith('Gain') then
+		equip(sets.midcast['Enhancing Magic'].GainSpell)
+		elseif ((spell.english:startswith('Haste') or spell.english:startswith("Flurry")
+		or spell.english == 'Aquaveil' or spell.english:startswith('Protect') 
 		or spell.english:startswith('Shell') or spell.english == 'Sneak' or spell.english == 'Invisible' or 
 		spell.english == 'Deodorize' or spell.english:startswith('Regen')) and spell.target.type == 'SELF') then
         equip(sets.midcast['Enhancing Magic'].SelfDuration)
