@@ -1,0 +1,1182 @@
+
+include('organizer-lib')
+
+
+function get_sets()
+	send_command('bind f9 gs c toggle TP set')
+	send_command('bind f10 gs c toggle Idle set')
+	send_command('bind f12 gs disable main sub;input /echo Weapons Locked;')
+	send_command('bind f11 gs c toggle CDC set')
+	send_command('bind ^f12 gs enable main sub;input /echo Weapons Unlocked;')
+
+
+
+	function file_unload()
+      
+ 
+        send_command('unbind ^f9')
+        send_command('unbind ^f10')
+		send_command('unbind ^f11')
+		send_command('unbind ^f12')
+       
+        send_command('unbind !f9')
+        send_command('unbind !f10')
+		send_command('unbind !f11')
+        send_command('unbind !f12')
+ 
+        send_command('unbind f9')
+        send_command('unbind f10')
+        send_command('unbind f11')
+        send_command('unbind f12')
+ 
+       
+ 
+	end	
+
+
+	--Idle Sets--	
+	sets.Idle = {}
+	
+	sets.Idle.index = {'Town','Refresh','DT'}
+		Idle_ind = 1			
+
+	sets.Idle.Town = {
+		ammo="Staunch Tathlum",
+		head="Ayanmo Zucchetto +2",
+		neck="Loricate Torque +1",
+		ear1="Merman's Earring",
+		ear2="Merman's Earring",
+		body="Jhakri Robe +2",
+		hands="Assimilator's Bazubands +3",
+		ring1="Defending Ring",
+		ring2="Warp Ring",
+		back="Solemnity Cape",
+		waist="Flume Belt +1",
+		legs="Carmine Cuisses +1",
+		feet={ name="Herculean Boots", augments={'Pet: Attack+19 Pet: Rng.Atk.+19','Pet: "Dbl. Atk."+4','"Refresh"+1','Accuracy+8 Attack+8',}},}
+
+	sets.Idle.Refresh = {
+		main="Bolelabunga",
+		ammo="Ginsen",
+		head="Rawhide Mask",
+		neck="Loricate torque +1",
+		ear1="Reraise Earring",
+		ear2="Infused Earring",
+		body="Jhakri Robe +2",
+		hands="Serpentes Cuffs",
+		ring1="Defending ring",
+		ring2="Dark Ring",
+		back="Kumbira cape",
+		waist="flume belt +1",
+		legs="Lengo Pants",
+		feet={ name="Herculean Boots", augments={'Pet: Attack+19 Pet: Rng.Atk.+19','Pet: "Dbl. Atk."+4','"Refresh"+1','Accuracy+8 Attack+8',}},}
+
+	sets.Idle.DT = {
+		main="Terra's Staff",
+		sub="Alber strap",
+		ammo="Vanir Battery",
+		head="Ayanmo Zucchetto +2",
+		body="Ayanmo Corazza +2",
+		hands="Assimilator's Bazubands +3",
+		legs={ name="Carmine Cuisses +1", augments={'Accuracy+20','Attack+12','"Dual Wield"+6',}},
+		feet={ name="Herculean Boots", augments={'Pet: Attack+19 Pet: Rng.Atk.+19','Pet: "Dbl. Atk."+4','"Refresh"+1','Accuracy+8 Attack+8',}},
+		neck="Loricate Torque +1",
+		waist="Flume Belt +1",
+		left_ear="Merman's Earring",
+		right_ear="Merman's Earring",
+		left_ring="Defending Ring",
+		right_ring="Dark Ring",
+		back="Solemnity Cape",}
+
+
+	--TP Sets--
+	
+	sets.TP = {}
+
+	sets.TP.index = {'Standard', 'Crit', 'Solo', 'Safe', 'DT', 'TH'}
+	--[[1= Standard/Full TP, 2= Crit Gear for Domain Invasion, Solo = DT-Lite, Safe = DT - MID, DT = Turtle, Acc modes commented out.  Use in niche situations, but otherwise 
+	just use more buffers instead]]
+		TP_ind = 1
+	--'AccuracyLite', 'AccuracyFull', 'AccuracyExtreme',
+	
+	sets.TP.Standard = {
+		main="Sequence",
+		sub={ name="Colada", augments={'Weapon skill damage +3%','STR+11','Accuracy+13','Attack+13','DMG:+2',}},
+		ammo="Ginsen",
+		head="Adhemar Bonnet +1",
+		body="Adhemar Jacket +1",
+		hands={ name="Adhemar Wrist. +1", augments={'DEX+12','AGI+12','Accuracy+20',}},
+		legs={ name="Samnuha Tights", augments={'STR+10','DEX+10','"Dbl.Atk."+3','"Triple Atk."+3',}},
+		feet={ name="Herculean Boots", augments={'Accuracy+23 Attack+23','"Triple Atk."+4','DEX+7','Attack+6',}},
+		neck="Lissome Necklace",
+		waist="Windbuffet Belt +1",
+		left_ear="Suppanomimi",
+		right_ear="Brutal Earring",
+		left_ring="Epona's Ring",
+		right_ring="Petrov Ring",
+		back={ name="Rosmerta's Cape", augments={'DEX+20','Accuracy+20 Attack+20','Accuracy+10','"Dbl.Atk."+10','Damage taken-5%',}},}
+				
+	sets.TP.Crit = {
+		main="Tizona",
+		sub="Sequence",
+		ammo="Ginsen",
+		head={ name="Adhemar Bonnet +1", augments={'STR+12','DEX+12','Attack+20',}},
+		body="Abnoba Kaftan",
+		hands={ name="Adhemar Wrist. +1", augments={'DEX+12','AGI+12','Accuracy+20',}},
+		legs={ name="Samnuha Tights", augments={'STR+10','DEX+10','"Dbl.Atk."+3','"Triple Atk."+3',}},
+		feet="Ayanmo Gambieras +2",
+		neck="Lissome Necklace",
+		waist="Reiki Yotai",
+		left_ear="Suppanomimi",
+		right_ear="Brutal Earring",
+		left_ring="Epona's Ring",
+		right_ring="Begrudging Ring",
+		back={ name="Rosmerta's Cape", augments={'DEX+20','Accuracy+20 Attack+20','DEX+10','Crit.hit rate+10',}},}
+				
+	sets.TP.Solo = {
+		main="Sequence",
+		sub={ name="Colada", augments={'Weapon skill damage +3%','STR+11','Accuracy+13','Attack+13','DMG:+2',}},
+		ammo="Staunch Tathlum",
+		head="Adhemar Bonnet +1",
+		body="Ayanmo Corazza +2",
+		hands="Adhemar Wristbands +1",
+		legs={ name="Samnuha Tights", augments={'STR+10','DEX+10','"Dbl.Atk."+3','"Triple Atk."+3',}},
+		feet={ name="Herculean Boots", augments={'Accuracy+23 Attack+23','"Triple Atk."+4','DEX+7','Attack+6',}},
+		neck="Loricate Torque +1",
+		waist="Reiki Yotai",
+		left_ear="Suppanomimi",
+		right_ear="Brutal Earring",
+		left_ring="Defending Ring",
+		right_ring="Epona's Ring",
+		back={ name="Rosmerta's Cape", augments={'DEX+20','Accuracy+20 Attack+20','Accuracy+10','"Dbl.Atk."+10','Damage taken-5%',}},}
+
+	sets.TP.Safe ={
+		main="Sequence",
+		sub={ name="Colada", augments={'Weapon skill damage +3%','STR+11','Accuracy+13','Attack+13','DMG:+2',}},
+		ammo="Staunch Tathlum",
+		head="Adhemar Bonnet +1",
+		body="Ayanmo Corazza +2",
+		hands="Assimilator's Bazubands +3",
+		legs="Samnuha Tights",
+		feet={ name="Herculean Boots", augments={'Accuracy+23 Attack+23','"Triple Atk."+4','DEX+7','Attack+6',}},
+		neck="Loricate Torque +1",
+		waist="Reiki Yotai",
+		left_ear="Suppanomimi",
+		right_ear="Brutal Earring",
+		left_ring="Defending Ring",
+		right_ring="Epona's Ring",
+		back={ name="Rosmerta's Cape", augments={'DEX+20','Accuracy+20 Attack+20','Accuracy+10','"Dbl.Atk."+10','Damage taken-5%',}},}
+
+	--[[sets.TP.AccuracyLite = {
+		ammo="Ginsen",
+		head="Carmine Mask +1",
+		neck="Lissome Necklace",
+		ear1="Cessance Earring",
+		ear2="Brutal earring",
+		body="Adhemar Jacket +1",
+		hands="Adhemar Wristbands +1",
+		ring1="Epona's ring",
+		ring2="Petrov Ring",
+				back={ name="Rosmerta's Cape", augments={'DEX+20','Accuracy+20 Attack+20','Accuracy+10','"Dbl.Atk."+10','Damage taken-5%',}},
+		waist="windbuffet belt +1",
+		legs="Carmine Cuisses +1",
+		feet={ name="Herculean Boots", augments={'Accuracy+23 Attack+23','"Triple Atk."+4','DEX+7','Attack+6',}}}
+	
+	sets.TP.AccuracyFull = {
+		main="Tizona",
+		sub="Sequence",
+		ammo="Ginsen",
+		head={ name="Carmine Mask +1", augments={'Accuracy+20','Mag. Acc.+12','"Fast Cast"+4',}},
+		body="Adhemar Jacket +1",
+		hands="Adhemar Wristbands +1",
+		legs={ name="Carmine Cuisses +1", augments={'Accuracy+20','Attack+12','"Dual Wield"+6',}},
+		feet={ name="Herculean Boots", augments={'Accuracy+23 Attack+23','"Triple Atk."+4','DEX+7','Attack+6',}},
+		neck="Sanctity Necklace",
+		waist="Kentarch Belt +1",
+		left_ear="Digni. Earring",
+		right_ear="Cessance Earring",
+		left_ring="Epona's Ring",
+		right_ring="Petrov Ring",
+		back={ name="Rosmerta's Cape", augments={'DEX+20','Accuracy+20 Attack+20','Accuracy+10','"Dbl.Atk."+10','Damage taken-5%',}},}
+
+	sets.TP.AccuracyExtreme = {
+		main="Tizona",
+		sub="Sequence",
+		ammo="Falcon Eye",
+		head={ name="Carmine Mask +1", augments={'Accuracy+20','Mag. Acc.+12','"Fast Cast"+4',}},
+		body="Adhemar Jacket +1",
+		hands="Adhemar Wristbands +1",
+		legs={ name="Carmine Cuisses +1", augments={'Accuracy+20','Attack+12','"Dual Wield"+6',}},
+		feet={ name="Herculean Boots", augments={'Accuracy+23 Attack+23','"Triple Atk."+4','DEX+7','Attack+6',}},
+		neck="Iqabi Necklace",
+		waist="Kentarch Belt +1",
+		left_ear="Digni. Earring",
+		right_ear="Zennaroi Earring",
+		left_ring="Cacoethic Ring +1",
+		right_ring="Enlivened Ring",
+		back={ name="Rosmerta's Cape", augments={'DEX+20','Accuracy+20 Attack+20','Accuracy+10','"Dbl.Atk."+10','Damage taken-5%',}},}
+]]
+	sets.TP.DT = {
+		main="Tizona",
+		ammo="Staunch Tathlum",
+		head={ name="Adhemar Bonnet +1", augments={'STR+12','DEX+12','Attack+20',}},
+		body="Ayanmo Corazza +2",
+		hands="Assim. Bazu. +3",
+		legs={ name="Samnuha Tights", augments={'STR+10','DEX+10','"Dbl.Atk."+3','"Triple Atk."+3',}},
+		feet={ name="Herculean Boots", augments={'Accuracy+23 Attack+23','"Triple Atk."+4','DEX+7','Attack+6',}},
+		neck="Loricate Torque +1",
+		waist="Reiki Yotai",
+		left_ear="Suppanomimi",
+		right_ear="Brutal Earring",
+		left_ring="Defending Ring",
+		right_ring="Dark Ring",
+		back={ name="Rosmerta's Cape", augments={'DEX+20','Accuracy+20 Attack+20','Accuracy+10','"Dbl.Atk."+10','Damage taken-5%',}},}
+
+	sets.TP.TH = {
+		main="Tizona",
+		sub={ name="Mimesis", augments={'Accuracy+50','Mag. Acc.+50','System: 2 ID: 115 Val: 79',}},
+		ammo="Ginsen",
+		head="Adhemar Bonnet +1",
+		body="Adhemar Jacket +1",
+		hands="Adhemar Wristbands +1",
+		legs={ name="Herculean Trousers", augments={'MND+5','Accuracy+7','"Treasure Hunter"+1','Mag. Acc.+10 "Mag.Atk.Bns."+10',}},
+		feet={ name="Herculean Boots", augments={'Mag. Acc.+22','CHR+8','"Treasure Hunter"+2',}},
+		neck="Lissome Necklace",
+		waist="Chaac Belt",
+		left_ear="Cessance Earring",
+		right_ear="Brutal Earring",
+		left_ring="Epona's Ring",
+		right_ring="Petrov Ring",
+		back={ name="Rosmerta's Cape", augments={'DEX+20','Accuracy+20 Attack+20','Accuracy+10','"Dbl.Atk."+10','Damage taken-5%',}},}
+
+	
+	
+	--Weaponskill Sets--
+	
+	
+	sets.WS = {
+		ammo="Falcon Eye",
+		head="Adhemar Bonnet +1",
+		neck="Fotia gorget",
+		ear1="Moonshade earring",
+		ear2="Brutal earring",
+		body="Abnoba Kaftan",
+		hands={ name="Herculean Gloves", augments={'Accuracy+6','Crit. hit damage +5%','STR+6','Attack+15',}},
+		ring1="Epona's ring",ring2="Begrudging Ring",
+		back={ name="Rosmerta's Cape", augments={'DEX+20','Accuracy+20 Attack+20','DEX+10','Crit.hit rate+10',}},
+		waist="Fotia Belt",
+		legs={ name="Herculean Trousers", augments={'Accuracy+25 Attack+25','Crit. hit damage +4%','AGI+7',}},
+		feet="Thereoid Greaves"}
+		
+	sets.Requiescat = {}
+	
+	sets.Requiescat.index = {'Attack','Accuracy'}
+		Requiescat_ind = 1
+	
+	sets.Requiescat.Attack = {
+		main="Sequence",
+		sub={ name="Colada", augments={'Weapon skill damage +4%','AGI+2',}},
+		ammo="Mantoptera Eye",
+		head="Jhakri Coronal +2",
+		body="Jhakri Robe +2",
+		hands="Jhakri Cuffs +2",
+		legs="Jhakri Slops +2",
+		feet="Jhakri Pigaches +2",
+		neck="Caro Necklace",
+		waist="Prosilio Belt +1",
+		left_ear={ name="Moonshade Earring", augments={'Mag. Acc.+4','TP Bonus +25',}},
+		right_ear="Cessance Earring",
+		left_ring="Begrudging Ring",
+		right_ring="Rufescent Ring",
+		back={ name="Rosmerta's Cape", augments={'DEX+20','Accuracy+20 Attack+20','Accuracy+10','"Store TP"+10',}},}
+
+	sets.Requiescat.Accuracy = {
+		main="Sequence",
+		sub="Colada",
+		ammo="Mantoptera Eye",
+		head="Jhakri Coronal +2",
+		body="Jhakri Robe +2",
+		hands="Jhakri Cuffs +2",
+		legs="Jhakri Slops +2",
+		feet="Jhakri Pigaches +2",
+		neck="Caro Necklace",
+		waist="Prosilio Belt +1",
+		left_ear={ name="Moonshade Earring", augments={'Mag. Acc.+4','TP Bonus +25',}},
+		right_ear="Cessance Earring",
+		left_ring="Begrudging Ring",
+		right_ring="Rufescent Ring",
+		back={ name="Rosmerta's Cape", augments={'DEX+20','Accuracy+20 Attack+20','Accuracy+10','"Store TP"+10',}},}
+
+	sets.ChantDuCygne = {}
+	
+	sets.ChantDuCygne.index = {'Attack','Accuracy'}
+		ChantDuCygne_ind = 1
+	
+	sets.ChantDuCygne.Attack = {
+		main="Tizona",
+		sub={ name="Colada", augments={'"Dbl.Atk."+4','Accuracy+15','Attack+5','DMG:+13',}},
+		ammo="Falcon Eye",
+		head={ name="Adhemar Bonnet +1", augments={'STR+12','DEX+12','Attack+20',}},
+		body="Abnoba Kaftan",
+		hands={ name="Adhemar Wrist. +1", augments={'DEX+12','AGI+12','Accuracy+20',}},
+		legs={ name="Samnuha Tights", augments={'STR+10','DEX+10','"Dbl.Atk."+3','"Triple Atk."+3',}},
+		feet={ name="Herculean Boots", augments={'Accuracy+23 Attack+23','"Triple Atk."+4','DEX+7','Attack+6',}},
+		neck="Fotia Gorget",
+		waist="Fotia Belt",
+		left_ear={ name="Moonshade Earring", augments={'Mag. Acc.+4','TP Bonus +250',}},
+		right_ear="Brutal Earring",
+		left_ring="Ilabrat Ring",
+		right_ring="Begrudging Ring",
+		back={ name="Rosmerta's Cape", augments={'DEX+20','Accuracy+20 Attack+20','DEX+10','Crit.hit rate+10',}},}
+
+	sets.ChantDuCygne.Accuracy = {
+		ammo="Falcon Eye",
+		head="Adhemar Bonnet +1",
+		neck="Fotia gorget",
+		ear1="Moonshade earring",
+		ear2="Zennaroi earring",
+		body="Sayadio's Kaftan",
+		hands="Adhemar Wristbands +1",
+		ring1="Cacoethic ring +1",
+		ring2="Begrudging Ring",
+		back={ name="Rosmerta's Cape", augments={'DEX+20','Accuracy+20 Attack+20','DEX+10','Crit.hit rate+10',}},
+		waist="Fotia Belt",
+		legs={ name="Herculean Trousers", augments={'Accuracy+25 Attack+25','Crit. hit damage +4%','AGI+7',}},
+		feet="Thereoid Greaves"}
+
+	sets.WS.SanguineBlade = {}
+	
+	sets.WS.SanguineBlade = {
+		ammo="Dosis Tathlum",
+		head={ name="Herculean Helm", augments={'Mag. Acc.+18 "Mag.Atk.Bns."+18','Enmity-4','INT+6','"Mag.Atk.Bns."+13',}},
+		neck="Sanctity Necklace",
+		ear1="Hecate's earring",
+		ear2="Friomisi earring",
+		body="Jhakri Robe +2",
+		hands="Jhakri Cuffs +2",
+		ring1="Shiva ring +1",
+		ring2="Shiva Ring +1",
+		back="Cornflower cape",
+		waist="Yamabuki-no-obi",
+		legs="Jhakri Slops +2",
+		feet="Jhakri Pigaches +2"}
+		
+	sets.WS.CircleBlade = {}		
+			
+	sets.WS.CircleBlade = {
+		ammo="Cheruski needle",
+	    head="Uk'uxkaj cap",
+		neck="Iqabi Necklace",
+		ear1="Moonshade earring",
+		ear2="Brutal earring",
+	    body="Assim. jubbah +3",
+		hands="Qaaxo mitaines",
+		ring1="Epona's ring",
+		ring2="Rajas ring",
+	    back="Bleating Mantle",
+		waist="Fotia Belt",
+		legs="Samnuha tights",
+		feet="Assim. charuqs +1",}	
+			
+	sets.WS.Expiacion = {
+		main="Tizona",
+		sub="Sequence",
+		ammo="Mantoptera Eye",
+		head={ name="Herculean Helm", augments={'Accuracy+29','Weapon skill damage +4%','STR+4',}},
+		body="Assimilator's Jubbah +3",
+		hands="Jhakri Cuffs +2",
+		legs={ name="Herculean Trousers", augments={'Weapon skill damage +5%','STR+8','Accuracy+8','Attack+10',}},
+		feet={ name="Herculean Boots", augments={'Accuracy+28','Weapon skill damage +5%','VIT+8','Attack+4',}},
+		neck="Caro Necklace",
+		waist="Prosilio Belt +1",
+		left_ear={ name="Moonshade Earring", augments={'Mag. Acc.+4','TP Bonus +25',}},
+		right_ear="Ishvara Earring",
+		left_ring="Karieyh Ring",
+		right_ring="Rufescent Ring",
+		back={ name="Rosmerta's Cape", augments={'STR+20','Accuracy+20 Attack+20','STR+10','Weapon skill damage +10%',}},}
+
+	sets.Realmrazer = {}
+	
+	sets.Realmrazer.index = {'Attack','Accuracy'}
+	Realmrazer_ind = 1
+	
+	sets.Realmrazer.Attack = {
+		ammo="Aqua Sachet",
+		head="Hagondes hat +1",
+		neck="Fotia gorget",
+		ear1="Moonshade earring",
+		ear2="Brutal earring",
+		body="Luhlaza jubbah +1",
+		hands="Luh. Bazubands +1",
+		ring1="Epona's ring",
+		ring2="Aquasoul ring",
+		back="Bleating Mantle",
+		waist="Fotia Belt",
+		legs="Telchine braconi",
+		feet="Assim. charuqs +1"}
+
+	sets.Realmrazer.Accuracy = {
+		ammo="Falcon Eye",
+		head="Whirlpool mask",
+		neck="Fotia gorget",
+		ear1="Bladeborn earring",
+		ear2="Steelflash earring",
+		body="Luhlaza jubbah +1",
+		hands="Luh. Bazubands +1",
+		ring1="Levia. ring",
+		ring2="Aquasoul ring",
+		back="Letalis mantle",
+		waist="Fotia Belt",
+		legs="Telchine braconi",
+		feet="Assim. charuqs +1"}
+	
+	sets.WS.FlashNova = {
+		ammo="Erlene's Notebook",
+		head={ name="Herculean Helm", augments={'Mag. Acc.+18 "Mag.Atk.Bns."+18','Enmity-4','INT+6','"Mag.Atk.Bns."+13',}},
+		neck="Sanctity Necklace",
+		ear1="Hecate's earring",
+		ear2="Friomisi earring",
+		body="Samnuha Coat",
+		hands="Leyline gloves",
+		ring1="Shiva Ring +1",
+		ring2="Shiva ring +1",
+		back="Cornflower cape",
+		waist="Fotia Belt",
+		legs="Hagondes Pants +1",
+		feet="Hashishin basmak +1"}
+	
+	sets.WS.SavageBlade = {
+		main="Sequence",
+		sub="Colada",
+		ammo="Mantoptera Eye",
+		head={ name="Herculean Helm", augments={'Accuracy+29','Weapon skill damage +4%','STR+4',}},
+		body="Assimilator's Jubbah +3",
+		hands="Jhakri Cuffs +2",
+		legs={ name="Herculean Trousers", augments={'Weapon skill damage +5%','STR+8','Accuracy+8','Attack+10',}},
+		feet={ name="Herculean Boots", augments={'Accuracy+28','Weapon skill damage +5%','VIT+8','Attack+4',}},
+		neck="Caro Necklace",
+		waist="Prosilio Belt +1",
+		left_ear={ name="Moonshade Earring", augments={'Mag. Acc.+4','TP Bonus +25',}},
+		right_ear="Ishvara Earring",
+		left_ring="Karieyh Ring",
+		right_ring="Rufescent Ring",
+		back={ name="Rosmerta's Cape", augments={'STR+20','Accuracy+20 Attack+20','STR+10','Weapon skill damage +10%',}},}
+	
+	--Blue Magic Sets--
+	sets.BlueMagic = {
+		main="Tizona",
+		sub={ name="Mimesis", augments={'Accuracy+50','Mag. Acc.+50','System: 2 ID: 115 Val: 79',}},
+		ammo="Pemphredo Tathlum",
+		head="Carmine Mask +1",
+		body="Jhakri Robe +2",
+		hands="Jhakri Cuffs +2",
+		legs="Jhakri Slops +2",
+		feet="Jhakri pigaches +2",
+		neck="Incanter's Torque",
+		waist="Eschan Stone",
+		left_ear="Gwati Earring",
+		right_ear="Dignitary's Earring",
+		left_ring="Stikini Ring",
+		right_ring="Stikini Ring",
+		back={ name="Cornflower Cape", augments={'MP+16','DEX+1','Blue Magic skill +9',}},}
+	
+	sets.BlueMagic.STR = {
+		main="Tizona",
+		sub={ name="Mimesis", augments={'Accuracy+50','Mag. Acc.+50','System: 2 ID: 115 Val: 79',}},
+		ammo="Pemphredo Tathlum",
+		head="Carmine Mask +1",
+		body="Jhakri Robe +2",
+		hands="Jhakri Cuffs +2",
+		legs="Jhakri Slops +2",
+		feet="Jhakri pigaches +2",
+		neck="Incanter's Torque",
+		waist="Eschan Stone",
+		left_ear="Gwati Earring",
+		right_ear="Dignitary's Earring",
+		left_ring="Stikini Ring",
+		right_ring="Stikini Ring",
+		back={ name="Cornflower Cape", augments={'MP+16','DEX+1','Blue Magic skill +9',}},}
+
+	sets.BlueMagic.STRDEX = {
+		main="Tizona",
+		sub={ name="Mimesis", augments={'Accuracy+50','Mag. Acc.+50','System: 2 ID: 115 Val: 79',}},
+		ammo="Pemphredo Tathlum",
+		head="Carmine Mask +1",
+		body="Jhakri Robe +2",
+		hands="Jhakri Cuffs +2",
+		legs="Jhakri Slops +2",
+		feet="Jhakri pigaches +2",
+		neck="Incanter's Torque",
+		waist="Eschan Stone",
+		left_ear="Gwati Earring",
+		right_ear="Dignitary's Earring",
+		left_ring="Stikini Ring",
+		right_ring="Stikini Ring",
+		back={ name="Cornflower Cape", augments={'MP+16','DEX+1','Blue Magic skill +9',}},}
+
+	sets.BlueMagic.STRVIT = {
+		main="Tizona",
+		sub={ name="Mimesis", augments={'Accuracy+50','Mag. Acc.+50','System: 2 ID: 115 Val: 79',}},
+		ammo="Pemphredo Tathlum",
+		head="Carmine Mask +1",
+		body="Jhakri Robe +2",
+		hands="Jhakri Cuffs +2",
+		legs="Jhakri Slops +2",
+		feet="Jhakri pigaches +2",
+		neck="Incanter's Torque",
+		waist="Eschan Stone",
+		left_ear="Gwati Earring",
+		right_ear="Dignitary's Earring",
+		left_ring="Stikini Ring",
+		right_ring="Stikini Ring",
+		back={ name="Cornflower Cape", augments={'MP+16','DEX+1','Blue Magic skill +9',}},}
+
+	sets.BlueMagic.STRMND = {
+		main="Tizona",
+		sub={ name="Mimesis", augments={'Accuracy+50','Mag. Acc.+50','System: 2 ID: 115 Val: 79',}},
+		ammo="Pemphredo Tathlum",
+		head="Carmine Mask +1",
+		body="Jhakri Robe +2",
+		hands="Jhakri Cuffs +2",
+		legs="Jhakri Slops +2",
+		feet="Jhakri pigaches +2",
+		neck="Incanter's Torque",
+		waist="Eschan Stone",
+		left_ear="Gwati Earring",
+		right_ear="Dignitary's Earring",
+		left_ring="Stikini Ring",
+		right_ring="Stikini Ring",
+		back={ name="Cornflower Cape", augments={'MP+16','DEX+1','Blue Magic skill +9',}},}
+
+	sets.BlueMagic.AGI = {
+		main="Tizona",
+		sub={ name="Mimesis", augments={'Accuracy+50','Mag. Acc.+50','System: 2 ID: 115 Val: 79',}},
+		ammo="Pemphredo Tathlum",
+		head="Carmine Mask +1",
+		body="Jhakri Robe +2",
+		hands="Jhakri Cuffs +2",
+		legs="Jhakri Slops +2",
+		feet="Jhakri pigaches +2",
+		neck="Incanter's Torque",
+		waist="Eschan Stone",
+		left_ear="Gwati Earring",
+		right_ear="Dignitary's Earring",
+		left_ring="Stikini Ring",
+		right_ring="Stikini Ring",
+		back={ name="Cornflower Cape", augments={'MP+16','DEX+1','Blue Magic skill +9',}},}
+
+	sets.BlueMagic.INT = {
+		main="Tizona",
+		sub={ name="Mimesis", augments={'Accuracy+50','Mag. Acc.+50','System: 2 ID: 115 Val: 79',}},
+		ammo="Mavi Tathlum",
+		head="Jhakri Coronal +2",
+		body="Jhakri Robe +2",
+		hands="Jhakri Cuffs +2",
+		legs="Jhakri Slops +2",
+		feet={ name="Herculean Boots", augments={'Attack+5','Mag. Acc.+19','Weapon skill damage +5%','Mag. Acc.+15 "Mag.Atk.Bns."+15',}},
+		neck="Sanctity Necklace",
+		waist="Yamabuki-no-Obi",
+		left_ear="Gwati Earring",
+		right_ear={ name="Moonshade Earring", augments={'Mag. Acc.+4','TP Bonus +25',}},
+		left_ring="Sangoma Ring",
+		right_ring="Weather. Ring",
+		back={ name="Cornflower Cape", augments={'MP+16','DEX+1','Blue Magic skill +9',}},}
+
+	sets.BlueMagic.SUB = {
+		main="Tizona",
+		sub="Colada",
+		ammo="Mavi Tathlum",
+		head={ name="Herculean Helm", augments={'Mag. Acc.+18 "Mag.Atk.Bns."+18','Enmity-4','INT+6','"Mag.Atk.Bns."+13',}},
+		neck="Sanctity Necklace",
+		ear1="Hecate's Earring",
+		ear2="Friomisi earring",
+		body="Jhakri Robe +2",
+		hands="Jhakri Cuffs +2",
+		ring1="Shiva Ring +1",
+		ring2="Shiva Ring +1",
+		back="Cornflower Cape",
+		waist="Eschan Stone",
+		legs="Jhakri Slops +2",
+		feet="Jhakri pigaches +2"}
+		
+	sets.BlueMagic.TH = {
+		main="Tizona",
+		sub={ name="Colada", augments={'DEX+12','Accuracy+20','DMG:+9',}},
+		ammo="Mavi Tathlum",
+		head={ name="Herculean Helm", augments={'Mag. Acc.+18 "Mag.Atk.Bns."+18','Enmity-4','INT+6','"Mag.Atk.Bns."+13',}},
+		body="Jhakri Robe +2",
+		hands="Jhakri Cuffs +2",
+		legs={ name="Herculean Trousers", augments={'MND+5','Accuracy+7','"Treasure Hunter"+1','Mag. Acc.+10 "Mag.Atk.Bns."+10',}},
+		feet={ name="Herculean Boots", augments={'Mag. Acc.+22','CHR+8','"Treasure Hunter"+2',}},
+		neck="Sanctity Necklace",
+		waist="Chaac Belt",
+		left_ear="Hecate's Earring",
+		right_ear="Friomisi Earring",
+		left_ring="Shiva Ring +1",
+		right_ring="Shiva Ring +1",
+		back={ name="Cornflower Cape", augments={'MP+16','DEX+1','Blue Magic skill +9',}},}
+
+	sets.BlueMagic.Cures = {
+		main="Tamaxchi",
+		sub="Bolelabunga",
+		ammo="Mavi Tathlum",
+		head={ name="Uk'uxkaj Cap", augments={'Phys. dmg. taken -2%','Magic dmg. taken -2%','Phys. dmg. taken -2%',}},
+		body="Pinga Tunic",
+		hands={ name="Rawhide Gloves", augments={'DEX+10','STR+7','INT+7',}},
+		legs="Pinga Pants",
+		feet={ name="Luhlaza Charuqs +1", augments={'Enhances "Diffusion" effect',}},
+		neck="Loricate Torque +1",
+		waist="Kentarch Belt +1",
+		left_ear="Digni. Earring",
+		right_ear="Mendicant's Earring",
+		left_ring="Stikini Ring",
+		right_ring="Stikini Ring",
+		back={ name="Cornflower Cape", augments={'MP+16','DEX+1','Blue Magic skill +9',}}}
+
+	sets.BlueMagic.SelfCures = {
+		main="Tamaxchi",
+		sub="Bolelabunga",
+		ammo="Mavi Tathlum",
+		head={ name="Uk'uxkaj Cap", augments={'Phys. dmg. taken -2%','Magic dmg. taken -2%','Phys. dmg. taken -2%',}},
+		body="Pinga Tunic",
+		hands={ name="Buremte Gloves", augments={'Phys. dmg. taken -2%','Magic dmg. taken -2%','Phys. dmg. taken -2%',}},
+		legs="Pinga Pants",
+		feet="Medium's Sabots",
+		neck="Loricate Torque +1",
+		waist="Gishdubar Sash",
+		left_ear="Digni. Earring",
+		right_ear="Mendicant's Earring",
+		left_ring="Dark Ring",
+		right_ring="Kunaji Ring",
+		back="Solemnity Cape",}
+
+	sets.BlueMagic.Stun = {
+		main="Tizona",
+		sub={ name="Mimesis", augments={'Accuracy+50','Mag. Acc.+50','System: 2 ID: 115 Val: 79',}},
+		ammo="Pemphredo Tathlum",
+		head="Carmine Mask +1",
+		body="Jhakri Robe +2",
+		hands="Jhakri Cuffs +2",
+		legs="Jhakri Slops +2",
+		feet="Jhakri pigaches +2",
+		neck="Incanter's Torque",
+		waist="Eschan Stone",
+		left_ear="Gwati Earring",
+		right_ear="Dignitary's Earring",
+		left_ring="Stikini Ring",
+		right_ring="Stikini Ring",
+		back={ name="Cornflower Cape", augments={'MP+16','DEX+1','Blue Magic skill +9',}},}
+
+	sets.BlueMagic.HeavyStrike = {
+		ammo="Mavi tathlum",
+		head="Whirlpool mask",
+		neck="iqabi necklace",
+		ear1="Flame pearl",
+		ear2="Flame pearl",
+		body="Luhlaza jubbah +1",
+		hands="Luh. Bazubands +1",
+		ring1="Spiral ring",
+		ring2="Rajas ring",
+		back="Letalis mantle",
+		waist="Hurch'lan sash",
+		legs="Taeon tights",
+		feet="Assim. charuqs +1"}
+
+	sets.BlueMagic.ChargedWhisker = {
+		ammo="Erlene's notebook",
+		head="Uk'uxkaj cap",
+		neck="Eddy necklace",
+		ear1="Hecate's earring",
+		ear2="Friomisi earring",
+		body="Count's Garb",
+		hands="Umuthi gloves",
+		ring1="Shiva ring+1",
+		ring2="Rajas ring",
+		back="Cornflower cape",
+		waist="Pipilaka belt",
+		legs="Amalric Slops",
+		feet="Helios boots"}
+
+	sets.BlueMagic.TenebralCrush = {
+		main="Tizona",
+		sub="Colada",
+		ammo="Mavi Tathlum",
+		head="Pixie Hairpin +1",
+		neck="Sanctity Necklace",
+		ear1="Hecate's Earring",
+		ear2="Friomisi earring",
+		body="Jhakri Robe +2",
+		hands="Jhakri Cuffs +2",
+		ring1="Shiva Ring +1",
+		ring2="Archon Ring",
+		back="Cornflower Cape",
+		waist="Eschan Stone",
+		legs="Jhakri Slops +2",
+		feet="Jhakri pigaches +2"}
+	
+	sets.BlueMagic.TenebralCrush.BurstAffinity = {
+		main="Tizona", 
+		sub="Colada",
+		ammo="Mavi Tathlum",
+		head="Pixie Hairpin +1",
+		neck="Sanctity Necklace",
+		ear1="Hecate's Earring",
+		ear2="Friomisi earring",
+		body="Jhakri Robe +2",
+		hands="Jhakri Cuffs +2",
+		ring1="Shiva Ring +1",
+		ring2="Archon Ring",
+		back="Cornflower Cape",
+		waist="Yamabuki-no-obi",
+		legs="Jhakri Slops +2",
+		feet="Hashishin Basmak +1"}
+	
+	sets.BlueMagic.WhiteWind = {
+		main="Vampirism",
+		sub="Vampirism",
+		ammo="Mavi tathlum",
+		head="Luh. Keffiyeh +1",
+		neck="Cuamiz collar",
+		ear1="Upsurge Earring",
+		ear2="Cassie earring",
+		body="Aetosaur jerkin",
+		hands="Weath. cuffs +1",
+		ring1="Bomb queen ring",
+		ring2="Meridian ring",
+		back="Oretania's cape",
+		waist="Gold mog. belt",
+		legs="Taeon Tights",
+		feet="Llwyd's clogs"}
+
+	sets.BlueMagic.MagicAccuracy = {
+		main="Tizona",
+		sub={ name="Mimesis", augments={'Accuracy+50','Mag. Acc.+50','System: 2 ID: 115 Val: 79',}},
+		ammo="Pemphredo Tathlum",
+		head="Carmine Mask +1",
+		body="Jhakri Robe +2",
+		hands="Jhakri Cuffs +2",
+		legs="Jhakri Slops +2",
+		feet="Jhakri pigaches +2",
+		neck="Erra Pendant",
+		waist="Eschan Stone",
+		left_ear="Regal Earring",
+		right_ear="Dignitary's Earring",
+		left_ring="Stikini Ring",
+		right_ring="Stikini Ring",
+		back={ name="Cornflower Cape", augments={'MP+16','DEX+1','Blue Magic skill +9',}},}
+
+	sets.BlueMagic.Skill = {
+		main="Tizona",
+		sub="Sequence",
+		ammo="Mavi Tathlum",
+		head="Carmine Mask +1",
+		body="Assim. Jubbah +3",
+		hands={ name="Rawhide Gloves", augments={'DEX+10','STR+7','INT+7',}},
+		legs="Aya. Cosciales +1",
+		feet={ name="Luhlaza Charuqs +1", augments={'Enhances "Diffusion" effect',}},
+		neck="Incanter's Torque",
+		waist="Kentarch Belt +1",
+		left_ear="Digni. Earring",
+		right_ear="Zennaroi Earring",
+		left_ring="Stikini Ring",
+		right_ring="Stikini Ring",
+		back={ name="Cornflower Cape", augments={'MP+16','DEX+1','Blue Magic skill +9',}},}
+							
+	sets.BlueMagic.SkillRecast = {
+		main="Tizona",
+		sub="Sequence",
+		ammo="Mavi Tathlum",
+		head="Carmine Mask +1",
+		body="Assim. Jubbah +3",
+		hands={ name="Rawhide Gloves", augments={'DEX+10','STR+7','INT+7',}},
+		legs="Aya. Cosciales +1",
+		feet={ name="Luhlaza Charuqs +1", augments={'Enhances "Diffusion" effect',}},
+		neck="Incanter's Torque",
+		waist="Kentarch Belt +1",
+		left_ear="Digni. Earring",
+		right_ear="Zennaroi Earring",
+		left_ring="Stikini Ring",
+		right_ring="Stikini Ring",
+		back={ name="Cornflower Cape", augments={'MP+16','DEX+1','Blue Magic skill +9',}},}
+	
+	
+	
+	
+	--Utility Sets--
+	sets.Utility = {}
+
+	sets.Utility.Weather = {waist="Hachirin-No-Obi"}
+	
+	sets.Utility.Weather.BurstAffinity = {
+		waist="Hachirin-No-Obi",
+		ring1="Mujin Band",
+		ring2="Shiva Ring +1",
+		back="Twilight cape"}
+	
+	sets.Adoulin = {body="Councilor's Garb",}
+	
+	sets.MoveSpeed = {legs = "Carmine Cuisses +1",}
+	
+	--Job Ability Sets--
+	
+	sets.JA = {}
+	
+	sets.JA.ChainAffinity = {
+		Head="Hashishin kavuk",
+		feet="Assim. charuqs +1"}
+	
+	sets.JA.BurstAffinity = {
+		head={ name="Herculean Helm", augments={'Mag. Acc.+18 "Mag.Atk.Bns."+18','Enmity-4','INT+6','"Mag.Atk.Bns."+13',}},
+		ring1="Mujin Band",
+		Ear1="Static Earring",
+		hands={ name="Herculean Gloves", augments={'Pet: STR+12',
+								'Pet: Phys. dmg. taken -2%',
+								'Magic burst mdg.+15%',
+								'Accuracy+15 Attack+15',
+								'Mag. Acc.+5 "Mag.Atk.Bns."+5',}},
+		feet="Hashi. basmak +1"}
+	
+	sets.JA.Efflux = {legs="Hashishin Tayt"}
+	
+	sets.JA.AzureLore = {hands="Luh. bazubands +1"}
+	
+	sets.JA.Diffusion = {feet="Luhlaza Charuqs +1"}
+
+	
+	
+	
+	--Precast Sets--
+	sets.precast = {}
+	
+	sets.precast.FC = {}
+	
+	sets.precast.FC.Standard = {
+		main="Vampirism",
+		head="Carmine Mask +1",
+		neck="Orunmila's torque",
+		ear1="Loquac. Earring",
+		ear2="Etiolation Earring",
+		body="Taeon Tabard",
+		hands="Helios Gloves",
+		ring1="Prolix ring",
+		ring2="Kishar ring",
+		back="Swith Cape +1",
+		waist="Witful Belt",
+		legs="Pinga Pants",
+		feet="Carmine Greaves +1"}
+	
+	sets.precast.FC.Blue = {
+		main="Vampirism",sub="Iris",
+		head="Carmine Mask +1",
+		neck="Orunmila's torque",
+		ear1="Loquac. Earring",
+		ear2="Etiolation Earring",
+		body="Hashishin Mintan",
+		hands="Helios Gloves",
+		ring1="Prolix ring",
+		ring2="Kishar ring",
+		back="Swith Cape +1",
+		legs="Pinga Pants",
+		feet="Carmine Greaves +1"}	
+
+end
+
+
+
+function precast(spell)
+	if spell.action_type == 'Magic' then
+		equip(sets.precast.FC.Standard)
+				
+		if spell.skill == 'Blue Magic' then
+			equip(sets.precast.FC.Blue)
+		end
+	end
+	
+	if spell.english == 'Azure Lore' then
+		equip(sets.JA.AzureLore)
+	end
+	
+	if spell.english == 'Requiescat' or spell.english == 'Savage Blade' then
+		equip(sets.Requiescat[sets.Requiescat.index[Requiescat_ind]])
+	end
+	
+	if spell.english == 'Chant du Cygne' then
+		equip(sets.ChantDuCygne[sets.ChantDuCygne.index[ChantDuCygne_ind]])
+	end
+	
+	if spell.english == 'Circle Blade' then
+		equip(sets.WS.CircleBlade)
+	end
+	
+	if spell.english == 'Savage Blade' then
+		equip(sets.WS.SavageBlade)
+	end
+		
+	if spell.english == 'Expiacion' then
+		equip(sets.WS.Expiacion)
+	end
+	
+	if spell.english == 'Sanguine Blade' then
+		equip(sets.WS.SanguineBlade)
+	end
+	
+	if spell.english == 'Box Step' then
+		equip(sets.Utility.Steps)
+	end
+	
+	if spell.english == 'Realmrazer' then
+		equip(sets.Realmrazer[sets.Realmrazer.index[Realmrazer_ind]])
+	end
+	
+	if spell.english == 'Flash Nova' then
+		equip(sets.WS.FlashNova)
+	end
+end
+	
+function midcast(spell,act)
+	if spell.english == 'Vertical Cleave' or spell.english == 'Death Scissors' or spell.english == 'Empty Thrash' 
+	or spell.english == 'Dimensional Death' or spell.english == 'Quadrastrike' or spell.english == 'Bloodrake' then
+		equip(sets.BlueMagic.STR)
+		if buffactive['Chain Affinity'] then
+			equip(sets.JA.ChainAffinity)
+		end
+		if buffactive['Efflux'] then
+			equip(sets.JA.Efflux)
+		end
+	end
+		
+	if spell.english == 'Disseverment' or spell.english == 'Hysteric Barrage' or spell.english == 'Frenetic Rip' 
+	or spell.english == 'Seedspray' or spell.english == 'Vanity Dive' or spell.english == 'Goblin Rush' 
+	or spell.english == 'Paralyzing Triad' or spell.english == 'Thrashing Assault' or spell.english== 'Sinker Drill' then
+		equip(sets.BlueMagic.STRDEX)
+		if buffactive['Chain Affinity'] then
+			equip(sets.JA.ChainAffinity)
+		end
+		if buffactive['Efflux'] then
+			equip(sets.JA.Efflux)
+		end
+	end
+	
+	if spell.english == 'Quad. Continuum' or spell.english == 'Delta Thrust' or spell.english == 'Cannonball' 
+	or spell.english == 'Glutinous Dart' then
+		equip(sets.BlueMagic.STRVIT)
+		if buffactive['Chain Affinity'] then
+			equip(sets.JA.ChainAffinity)
+		end
+		if buffactive['Efflux'] then
+			equip(sets.JA.Efflux)
+		end
+	end
+	
+	if spell.english == 'Whirl of Rage' then
+		equip(sets.BlueMagic.STRMND)
+		if buffactive['Chain Affinity'] then
+			equip(sets.JA.ChainAffinity)
+		end
+		if buffactive['Efflux'] then
+			equip(sets.JA.Efflux)
+		end
+	end
+	
+	if spell.english == 'Final Sting' or spell.english == 'Spiral Spin' then
+		equip(sets.BlueMagic.AGI)
+		if buffactive['Chain Affinity'] then
+			equip(sets.JA.ChainAffinity)
+		end
+		if buffactive['Efflux'] then
+			equip(sets.JA.Efflux)
+		end
+	end
+	
+	if spell.english == 'Gates of Hades' or spell.english == 'Leafstorm' or spell.english == 'Firespit' 
+	or spell.english == 'Acrid Stream' or spell.english == 'Regurgitation' or spell.english == 'Corrosive Ooze' 
+	or spell.english == 'Thermal Pulse' or spell.english == 'Evryone. Grudge' or spell.english == 'Water Bomb' 
+	or spell.english == 'Thunderbolt' or spell.english == 'Tem. Upheaval' or spell.english == 'Foul Waters' 
+	or spell.english == 'Rending Deluge' or spell.english == 'Droning Whirlwind' then
+		equip(sets.BlueMagic.INT)
+		if (spell.element == world.day_element or spell.element == world.weather_element) 
+		and buffactive['Burst Affinity'] then
+			equip(sets.Utility.Weather.BurstAffinity)
+		elseif spell.element == world.day_element or spell.element then
+			equip(sets.Utility.Weather)
+		end
+		if buffactive['Burst Affinity'] then
+			equip(sets.JA.BurstAffinity)
+		end
+
+	end
+	
+	if spell.english == 'Subduction' or spell.english == 'Searing Tempest' or spell.english == 'Atra. Libations' 
+	or spell.english == 'Entomb' or spell.english == 'Uproot' or spell.english == 'Polar Roar' 
+	or spell.english == 'Crashing Thunder' or spell.english == 'Cesspool' or spell.english == 'Blinding Fulgor' 
+	or spell.english == 'Anvil Lightning' or spell.english == 'Magic Hammer' 
+	or spell.english == 'Silent Storm' or spell.english == 'Water Bomb' or spell.english == 'Blood Drain' 
+	or spell.english == 'Cursed Sphere' or spell.english == 'Molting Plumage' or spell.english == 'Wind Breath' 
+	or spell.english == 'Tem. Upheaval '  or spell.english == 'Embalming Earth' then
+		equip(sets.BlueMagic.SUB)
+		if buffactive['Burst Affinity'] then
+			equip(sets.JA.BurstAffinity)
+			end
+		if (spell.element == world.day_element or spell.element == world.weather_element) 
+		and buffactive['Burst Affinity'] then
+			equip(sets.Utility.Weather.BurstAffinity)
+		elseif spell.element == world.day_element or spell.element then
+			equip(sets.Utility.Weather)
+		end
+	end
+	
+	if spell.english == 'Sleepga' then
+		equip(sets.BlueMagic.TH)
+	end
+	
+	if (spell.english == 'Tenebral Crush' or spell.english == 'Palling Salvo' or spell.english == 'Dark Orb') and buffactive['Burst Affinity'] 
+	and (spell.element == world.day_element or spell.element == world.weather_element) then
+		equip(set_combine(sets.BlueMagic.TenebralCrush.BurstAffinity, sets.Utility.Weather.BurstAffinity))
+	elseif (spell.english == 'Tenebral Crush' or spell.english == 'Palling Salvo' or spell.english == 'Dark Orb')
+	and (spell.element == world.day_element or spell.element == world.weather_element) then
+		equip(set_combine(sets.BlueMagic.TenebralCrush, sets.Utility.Weather))
+	elseif (spell.english == 'Tenebral Crush' or spell.english == 'Palling Salvo' or spell.english == 'Dark Orb') and buffactive['Burst Affinity'] then
+		equip(sets.BlueMagic.TenebralCrush.BurstAffinity)
+	elseif (spell.english == 'Tenebral Crush' or spell.english == 'Palling Salvo' or spell.english == 'Dark Orb') then
+		equip(sets.BlueMagic.TenebralCrush)
+	end
+	
+	
+	if spell.english == 'Magic Fruit' or spell.english == 'Plenilune Embrace' or spell.english == 'Wild Carrot' 
+	or spell.english == 'Pollen' or spell.english == 'Cure III' or spell.english == 'Cure IV' then
+		equip(sets.BlueMagic.Cures)
+		if spell.target.type == 'SELF' and spell.english == 'Magic Fruit' then
+			equip(sets.BlueMagic.SelfCures)
+		end
+	end
+	
+	if spell.english == 'White Wind' then
+		equip(sets.BlueMagic.WhiteWind)
+	end
+	
+	if spell.english == 'Head Butt' or spell.english == 'Sudden Lunge' or spell.english == 'Blitzstrahl' then
+		equip(sets.BlueMagic.Stun)
+	end
+	
+	if spell.english == 'Heavy Strike' then
+		equip(sets.BlueMagic.HeavyStrike)
+	end
+	
+	if spell.english == 'Charged Whisker' then
+		equip(sets.BlueMagic.ChargedWhisker)
+		if buffactive['Burst Affinity'] then
+			equip(sets.JA.BurstAffinity)
+		end
+	end
+	
+	if spell.english == 'Tail Slap' or spell.english == 'Sweeping Gouge' or spell.english =='Benthic Typhoon' 
+	or spell.english == 'Infrasonics' or spell.english == 'Barbed Crescent' or spell.english == 'Tourbillion' 
+	or spell.english == 'Cruel Joke' or spell.english == 'Bad Breath' or spell.english == 'Sudden Lunge' 
+	or spell.english == 'Cold Wave' or spell.english == 'Paralyzing Triad' or spell.english == 'Blank Gaze' 
+	or spell.english == 'Geist Wall' or spell.english== 'Dream Flower' or spell.english == 'Chaotic Eye' then
+		equip(sets.BlueMagic.MagicAccuracy)
+	end
+	
+	if spell.english == 'MP Drainkiss' or spell.english == 'Digest' or spell.english == 'Blood Saber' 
+	or spell.english == 'Blood Drain' or spell.english == 'Osmosis' or spell.english == 'Occultation' 
+	or spell.english == 'Magic Barrier' or spell.english == 'Diamondhide' or spell.english == 'Metallic Body' 
+	or spell.english == 'Retinal Glare' or spell.english == 'Barrier Tusk' or spell.english == 'Cocoon' 
+	or spell.english == 'Battery Charge' or spell.english == 'Memento Mori' or spell.english == 'Osmosis' 
+	or spell.english == 'Reactor cool' or spell.english == 'Magic Barrier' then
+		equip(sets.BlueMagic.SkillRecast)
+		if buffactive['Diffusion'] then
+			equip(sets.JA.Diffusion)
+		end
+	end
+	
+	if spell.english == 'Cocoon' or spell.english == 'Harden Shell' or spell.english == 'Animating Wail' 
+	or spell.english == 'Mighty Guard' or spell.english == 'Nat. Meditation' or spell.english == 'Carcharian Verve' 
+	or spell.english == 'O. Counterstance' or spell.english == 'Barrier Tusk' or spell.english == 'Saline Coat' 
+	or spell.english == 'Regeneration' or spell.english == 'Erratic Flutter' or spell.english == 'Carcharian Verve' then
+		equip(sets.BlueMagic.SkillRecast)
+		if buffactive['Diffusion'] then
+			equip(sets.JA.Diffusion)
+		end
+	end
+end
+
+function aftercast(spell)
+	if spell.action_type == 'Weaponskill' and spell.english == 'Shockwave' then
+		send_command('input /attack off')
+	end
+end
+
+
+function aftercast(spell, action, spellMap, eventArgs)
+	if not spell.interrupted then
+       if spell.english == "Dream Flower" then -- Sleep Countdown --
+            send_command('wait 60;input /echo DREAM FLOWER: [WEARING OFF IN 30 SEC.];wait 15;input /echo DREAM FLOWER: [WEARING OFF IN 15 SEC.];wait 10;input /echo DREAM FLOWER: [WEARING OFF IN 5 SEC.]')
+        elseif spell.english == "Entomb" then -- Petrify Countdown --
+            send_command('wait 30;input /echo ENTOMB: [WEARING OFF IN 30 SEC.];wait 15;input /echo ENTOMB: [WEARING OFF IN 15 SEC.];wait 10;input /echo ENTOMB: [WEARING OFF IN 5 SEC.]')        
+        elseif spell.english == "Tenebral Crush" then -- Defense Down Countdown --
+			send_command('wait 30;input /echo Defense Down wearing off (maybe?) in [30 seconds];wait 15;input /echo Defense Down wearing off (maybe?) [15 seconds];wait 10;input /echo Defense Down wearing off (maybe?) [5 seconds]')
+		elseif spell.english == "Nat. Meditation" then -- Attack up Countdown Countdown --
+			send_command('wait 60;input /echo Nat. Meditation RECAST!!! [30 Sec.];wait 15;input /echo Nat. Meditation RECAST!!! [15 Sec.];wait 10;input /echo Nat. Meditation RECAST!!! [5 Sec.]')	
+		end
+    end
+
+	
+	if player.status == 'Engaged' then
+		equip(sets.TP[sets.TP.index[TP_ind]])
+	else
+		equip(sets.Idle[sets.Idle.index[Idle_ind]])
+	end
+	
+	if spell.action_type == 'Weaponskill' then
+		add_to_chat(158,'TP Return: ['..tostring(player.tp)..']')
+	end
+end
+
+function status_change(new,old)
+	if new == 'Engaged' then
+		equip(sets.TP[sets.TP.index[TP_ind]])
+	else
+		equip(sets.Idle[sets.Idle.index[Idle_ind]])
+	end
+end
+
+function self_command(command)
+	if command == 'toggle TP set' then
+		TP_ind = TP_ind +1
+		if TP_ind > #sets.TP.index then TP_ind = 1 end
+		send_command('@input /echo <----- TP Set changed to '..sets.TP.index[TP_ind]..' ----->')
+		equip(sets.TP[sets.TP.index[TP_ind]])
+	elseif command == 'toggle Idle set' then
+		Idle_ind = Idle_ind +1
+		if Idle_ind > #sets.Idle.index then Idle_ind = 1 end
+		send_command('@input /echo <----- Idle Set changed to '..sets.Idle.index[Idle_ind]..' ----->')
+		equip(sets.Idle[sets.Idle.index[Idle_ind]])
+	elseif command == 'toggle Req set' then
+		Requiescat_ind = Requiescat_ind +1
+		if Requiescat_ind > #sets.Requiescat.index then Requiescat_ind = 1 end
+		send_command('@input /echo <----- Requiescat Set changed to '..sets.Requiescat.index[Requiescat_ind]..' ----->')
+	elseif command == 'toggle CDC set' then
+		ChantDuCygne_ind = ChantDuCygne_ind +1
+		if ChantDuCygne_ind > #sets.ChantDuCygne.index then ChantDuCygne_ind = 1 end
+		send_command('@input /echo <----- Chant du Cygne Set changed to '..sets.ChantDuCygne.index[ChantDuCygne_ind]..' ----->')
+	elseif command == 'toggle Rea set' then
+		Realmrazer_ind = Realmrazer_ind +1
+		if Realmrazer_ind > #sets.Realmrazer.index then Realmrazer_ind = 1 end
+		send_command('@input /echo <----- Realmrazer Set changed to '..sets.Realmrazer.index[Realmrazer_ind]..' ----->')
+	elseif command == 'equip TP set' then
+		equip(sets.TP[sets.TP.index[TP_ind]])
+	elseif command == 'equip Idle set' then
+		equip(sets.Idle[sets.Idle.index[Idle_ind]])
+	end
+end
+
+function select_default_macro_book()
+	if player.sub_job == 'WAR' then
+		set_macro_page(4, 5)
+	else
+		set_macro_page(4, 5)
+	end
+end
+
+
+organizer_items = {}
